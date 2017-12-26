@@ -16,18 +16,6 @@
 *.gch
 *.pch
 
-# Libraries
-*.lib
-*.a
-*.la
-*.lo
-
-# Shared objects (inc. Windows DLLs)
-*.dll
-*.so
-*.so.*
-*.dylib
-
 # Executables
 *.exe
 *.out
@@ -50,3 +38,7 @@ modules.order
 Module.symvers
 Mkfile.old
 dkms.conf
+
+# IDE support files
+.idea/
+
