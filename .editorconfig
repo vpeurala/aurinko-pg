@@ -12,4 +12,3 @@ trim_trailing_whitespace = true
 
 [*.java]
 indent_size = 4
-

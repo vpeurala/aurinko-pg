@@ -45,4 +45,3 @@ INSERT INTO laiva (nimi, laivasto, komentaja, pituus, vetoisuus, aseistus) VALUE
 
 INSERT INTO merimies (etunimi, sukunimi, sotilasarvo, esimies, palveluslaiva) VALUES
   ('Roope', 'Rosvo', 'Matruusi', (SELECT id FROM upseeri WHERE etunimi = 'Pentti' AND sukunimi = 'Koikkalainen'), (SELECT id FROM laiva WHERE nimi = 'Koppelo'));
-
