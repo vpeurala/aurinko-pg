@@ -1,6 +1,6 @@
-java_binary(
-  name = "aurinko-test",
+java_library(
+  name = "aurinko_test",
   srcs = glob(["**/*.java"]),
   main_class = "org.aurinkopg.Aurinko",
-  deps = ["@junit-5-jupiter-api//jar", "@postgresql//jar"]
+  deps = ["@junit5_jupiter_api//jar", "@postgresql//jar"]
 )
