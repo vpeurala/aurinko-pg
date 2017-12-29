@@ -6,7 +6,7 @@ java_binary(
 
 java_library(
     name = "aurinko_lib",
-    srcs = glob(["src/main/java/**/*.java"]),
+    srcs = ["//src/main/java:aurinko_main"],
     resources = glob(["src/main/resources/**/*"])
 )
 
