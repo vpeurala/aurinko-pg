@@ -1,13 +1,18 @@
 java_binary(
-  name = "aurinko",
-  srcs = glob(["**/*.java"]),
-  main_class = "org.aurinkopg.Aurinko",
-  deps = ["@postgresql//jar"]
+    name = "aurinko",
+    main_class = "org.aurinkopg.Aurinko",
+    deps = [":aurinko_lib"]
+)
+
+java_library(
+    name = "aurinko_lib",
+    srcs = glob(["src/main/java/**/*.java"]),
+    resources = glob(["src/main/resources/**/*"])
 )
 
 java_test(
   name = "aurinko_all_tests",
-  deps = ["@junit5_jupiter_api//jar", "@postgresql//jar"],
+  test_class = "org.aurinkopg.AurinkoTest",
   srcs = glob(["**/*.java"]),
-  test_class = "org.aurinkopg.AurinkoTest"
+  deps = ["@junit5_jupiter_api//jar", "@postgresql//jar"],
 )
