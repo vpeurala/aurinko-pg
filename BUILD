@@ -1,13 +1,12 @@
 java_binary(
     name = "aurinko",
     main_class = "org.aurinkopg.Aurinko",
-    deps = [":aurinko_lib"]
+    runtime_deps = [":aurinko_lib"]
 )
 
 java_library(
     name = "aurinko_lib",
-    srcs = ["//src/main/java:aurinko_main"],
-    resources = glob(["src/main/resources/**/*"])
+    runtime_deps = ["//src/main/java:aurinko_main"]
 )
 
 java_test(
