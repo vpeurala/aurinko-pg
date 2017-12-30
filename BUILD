@@ -6,7 +6,7 @@ java_binary(
 
 java_library(
     name = "aurinko_lib",
-    runtime_deps = ["//src/main/java:aurinko_main"]
+    runtime_deps = ["//src/main/java:aurinko_main_lib"]
 )
 
 java_test(

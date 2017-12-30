@@ -64,3 +64,12 @@ maven_jar(
   sha1 = "1c7788d16b67d51f2f38ae99e474ece968bf715a"
 );
 
+# https://github.com/JeffreyFalgout/bazel-junit5
+git_repository(
+    name = "name_falgout_jeffrey_junit5",
+    remote = "https://github.com/JeffreyFalgout/bazel-junit5.git",
+    tag = "v0.3.0"
+)
+
+load("@name_falgout_jeffrey_junit5//java:junit5.bzl", "junit5_maven_dependencies", "junit5_test_suites")
+
