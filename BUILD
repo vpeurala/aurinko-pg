@@ -11,8 +11,6 @@ java_library(
 
 java_test(
     name = "aurinko_all_tests",
-    test_class = "org.aurinkopg.AurinkoTest",
-    srcs = glob(["**/*.java"]),
-    deps = ["@junit4//jar", "@postgresql//jar"]
+    runtime_deps = ["@junit4//jar", "@postgresql//jar", "//src/test/java:aurinko_test_lib"]
     );
 
