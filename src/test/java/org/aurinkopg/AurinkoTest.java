@@ -19,7 +19,8 @@ public class AurinkoTest {
 
     @Test
     public void loginTest() throws Exception {
-        connect();
+        PgConnection connection = connect();
+        connection.execSQLQuery("CREATE DATABASE copy_of_jaanmurtaja WITH TEMPLATE jaanmurtaja OWNER jaanmurtaja");
     }
 
     public PgConnection connect() throws SQLException {
