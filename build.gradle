@@ -1,0 +1,18 @@
+version = '0.3'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+dependencies {
+    compile("org.postgresql:postgresql:42.1.4")
+    testCompile("junit:junit:4.12")
+}
+
+/* See https://liviutudor.com/2016/02/11/jacoco-gradle-excluding-source-files-and-classes/ */
+jacocoTestReport {
+    reports {
+        html { enabled true }
+    }
+}
+test.finalizedBy(project.tasks.jacocoTestReport)
+
