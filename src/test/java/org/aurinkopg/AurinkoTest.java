@@ -1,5 +1,6 @@
 package org.aurinkopg;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.postgresql.PGProperty;
 import org.postgresql.jdbc.PgConnection;
@@ -18,6 +19,7 @@ public class AurinkoTest {
     }
 
     @Test
+    @Ignore // TODO
     public void loginTest() throws Exception {
         PgConnection connection = connect();
         connection.execSQLQuery("CREATE DATABASE copy_of_jaanmurtaja WITH TEMPLATE jaanmurtaja OWNER jaanmurtaja");
