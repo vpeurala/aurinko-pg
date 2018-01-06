@@ -11,15 +11,16 @@ repositories {
 }
 
 dependencies {
-    compile("org.postgresql:postgresql:42.1.4")
-    testCompile("junit:junit:4.12")
+  compile("org.postgresql:postgresql:42.1.4")
+  testCompile("junit:junit:4.12")
+  testCompile("org.springframework:spring-jdbc:5.0.2.RELEASE")
 }
 
 /* See https://liviutudor.com/2016/02/11/jacoco-gradle-excluding-source-files-and-classes/ */
 jacocoTestReport {
-    reports {
-        html { enabled true }
-    }
+  reports {
+    html { enabled true }
+  }
 }
 test.finalizedBy(project.tasks.jacocoTestReport)
 
