@@ -1,11 +1,13 @@
 package org.aurinkopg;
 
+import java.util.Objects;
+
 /**
  * All necessary parameters for connecting to a PostgreSQL server.
  */
 public class ConnectionInfo {
     private final String host;
-    private final int port;
+    private final Integer port;
     private final String pgUsername;
     private final String pgPassword;
     private final String database;
@@ -13,13 +15,22 @@ public class ConnectionInfo {
     /**
      * Create a ConnectionInfo object.
      *
-     * @param host       the DNS hostname or the IP address of the database server.
-     * @param port       the port on the server where the database service is exposed.
-     * @param pgUsername database username (NOT the operating system username!) of the user as which you want to connect.
-     * @param pgPassword database password (NOT the operating system password!) of the user as which you want to connect.
-     * @param database   one PostgreSQL database server can contain multiple databases; this is the name of the database to which you want to connect.
+     * @param host       the DNS hostname or the IP address of the database server. Cannot be null.
+     * @param port       the port on the server where the database service is exposed. Cannot be null.
+     * @param pgUsername database username (NOT the operating system username!) of the user as which you want to connect. Cannot be null.
+     * @param pgPassword database password (NOT the operating system password!) of the user as which you want to connect. Can be null, since not all PostgreSQL users authenticate via a password.
+     * @param database   one PostgreSQL database server can contain multiple databases; this is the name of the database to which you want to connect. Cannot be null.
      */
-    public ConnectionInfo(String host, int port, String pgUsername, String pgPassword, String database) {
+    public ConnectionInfo(
+        String host,
+        int port,
+        String pgUsername,
+        String pgPassword,
+        String database) {
+        Objects.requireNonNull(host, "ConnectionInfo.host cannot be null!");
+        Objects.requireNonNull(port, "ConnectionInfo.port cannot be null!");
+        Objects.requireNonNull(pgUsername, "ConnectionInfo.pgUsername cannot be null!");
+        Objects.requireNonNull(database, "ConnectionInfo.database cannot be null!");
         this.host = host;
         this.port = port;
         this.pgUsername = pgUsername;
@@ -63,15 +74,18 @@ public class ConnectionInfo {
             '}';
     }
 
+    /**
+     * Use this class to create instances of {@link ConnectionInfo} objects.
+     */
     public static class Builder {
-        private String host;
-        private int port;
-        private String pgUsername;
+        private String host = "localhost";
+        private Integer port = 5432;
+        private String pgUsername = "postgres";
         private String pgPassword;
         private String database;
 
         /**
-         * Set the host.
+         * Set the host. Default is "localhost". Cannot be null.
          *
          * @param host the DNS hostname or the IP address of the database server.
          * @return the builder.
@@ -82,7 +96,7 @@ public class ConnectionInfo {
         }
 
         /**
-         * Set the port.
+         * Set the port. Default is 5432. Cannot be null.
          *
          * @param port the port on the server where the database service is exposed.
          * @return the builder.
@@ -93,7 +107,7 @@ public class ConnectionInfo {
         }
 
         /**
-         * Set the database username.
+         * Set the database username. Default is "postgres". Cannot be null.
          *
          * @param pgUsername database username (NOT the operating system username!) of the user as which you want to connect.
          * @return the builder.
@@ -104,7 +118,7 @@ public class ConnectionInfo {
         }
 
         /**
-         * Set the database password.
+         * Set the database password. There is no default. Can be null, since not all PostgreSQL users authenticate via a password.
          *
          * @param pgPassword database password (NOT the operating system password!) of the user as which you want to connect.
          * @return the builder.
@@ -115,7 +129,7 @@ public class ConnectionInfo {
         }
 
         /**
-         * Set the database.
+         * Set the database. There is no default. Cannot be null.
          *
          * @param database one PostgreSQL database server can contain multiple databases; this is the name of the database to which you want to connect.
          * @return the builder.
@@ -123,6 +137,24 @@ public class ConnectionInfo {
         public Builder setDatabase(String database) {
             this.database = database;
             return this;
+        }
+
+        /**
+         * Create a ConnectionInfo instance.
+         *
+         * @return a ConnectionInfo from the parameters given to this Builder.
+         */
+        public ConnectionInfo build() {
+            Objects.requireNonNull(this.host, "ConnectionInfo.host cannot be null!");
+            Objects.requireNonNull(this.port, "ConnectionInfo.port cannot be null!");
+            Objects.requireNonNull(this.pgUsername, "ConnectionInfo.pgUsername cannot be null!");
+            Objects.requireNonNull(this.database, "ConnectionInfo.database cannot be null!");
+            return new ConnectionInfo(
+                this.host,
+                this.port,
+                this.pgUsername,
+                this.pgPassword,
+                this.database);
         }
     }
 }
