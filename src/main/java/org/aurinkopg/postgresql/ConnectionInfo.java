@@ -1,5 +1,10 @@
-package org.aurinkopg;
+package org.aurinkopg.postgresql;
 
+import org.postgresql.PGProperty;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -11,31 +16,36 @@ public class ConnectionInfo {
     private final String pgUsername;
     private final String pgPassword;
     private final String database;
+    private final Map<PGProperty, String> connectionProperties;
 
     /**
      * Create a ConnectionInfo object.
      *
-     * @param host       the DNS hostname or the IP address of the database server. Cannot be null.
-     * @param port       the port on the server where the database service is exposed. Cannot be null.
-     * @param pgUsername database username (NOT the operating system username!) of the user as which you want to connect. Cannot be null.
-     * @param pgPassword database password (NOT the operating system password!) of the user as which you want to connect. Can be null, since not all PostgreSQL users authenticate via a password.
-     * @param database   one PostgreSQL database server can contain multiple databases; this is the name of the database to which you want to connect. Cannot be null.
+     * @param host                 the DNS hostname or the IP address of the database server. Cannot be null.
+     * @param port                 the port on the server where the database service is exposed. Cannot be null.
+     * @param pgUsername           database username (NOT the operating system username!) of the user as which you want to connect. Cannot be null.
+     * @param pgPassword           database password (NOT the operating system password!) of the user as which you want to connect. Can be null, since not all PostgreSQL users authenticate via a password.
+     * @param database             one PostgreSQL database server can contain multiple databases; this is the name of the database to which you want to connect. Cannot be null.
+     * @param connectionProperties a {@link Map<PGProperty, String>} of extra connection properties. Cannot be null, but can be empty.
      */
     public ConnectionInfo(
         String host,
         int port,
         String pgUsername,
         String pgPassword,
-        String database) {
+        String database,
+        Map<PGProperty, String> connectionProperties) {
         Objects.requireNonNull(host, "ConnectionInfo.host cannot be null!");
         Objects.requireNonNull(port, "ConnectionInfo.port cannot be null!");
         Objects.requireNonNull(pgUsername, "ConnectionInfo.pgUsername cannot be null!");
         Objects.requireNonNull(database, "ConnectionInfo.database cannot be null!");
+        Objects.requireNonNull(connectionProperties, "ConnectionInfo.connectionProperties cannot be null!");
         this.host = host;
         this.port = port;
         this.pgUsername = pgUsername;
         this.pgPassword = pgPassword;
         this.database = database;
+        this.connectionProperties = connectionProperties;
     }
 
     public String getHost() {
@@ -58,6 +68,10 @@ public class ConnectionInfo {
         return database;
     }
 
+    public Map<PGProperty, String> getConnectionProperties() {
+        return connectionProperties;
+    }
+
     public String getJdbcUrl() {
         return null;
     }
@@ -70,7 +84,8 @@ public class ConnectionInfo {
             ", pgUsername='" + pgUsername + '\'' +
             ", pgPassword='" + pgPassword + '\'' +
             ", database='" + database + '\'' +
-            ", jdbcUrl='" + getJdbcUrl() + '\'' +
+            ", connectionProperties=" + connectionProperties +
+            ", jdbcUrl=" + getJdbcUrl() +
             '}';
     }
 
@@ -83,6 +98,7 @@ public class ConnectionInfo {
         private String pgUsername = "postgres";
         private String pgPassword;
         private String database;
+        private final Map<PGProperty, String> connectionProperties = new HashMap<>();
 
         /**
          * Set the host. Default is "localhost". Cannot be null.
@@ -91,6 +107,7 @@ public class ConnectionInfo {
          * @return the builder.
          */
         public Builder setHost(String host) {
+            Objects.requireNonNull(host, "ConnectionInfo.Builder.host cannot be null!");
             this.host = host;
             return this;
         }
@@ -102,6 +119,7 @@ public class ConnectionInfo {
          * @return the builder.
          */
         public Builder setPort(int port) {
+            Objects.requireNonNull(port, "ConnectionInfo.Builder.port cannot be null!");
             this.port = port;
             return this;
         }
@@ -113,6 +131,7 @@ public class ConnectionInfo {
          * @return the builder.
          */
         public Builder setPgUsername(String pgUsername) {
+            Objects.requireNonNull(pgUsername, "ConnectionInfo.Builder.pgUsername cannot be null!");
             this.pgUsername = pgUsername;
             return this;
         }
@@ -124,6 +143,7 @@ public class ConnectionInfo {
          * @return the builder.
          */
         public Builder setPgPassword(String pgPassword) {
+            Objects.requireNonNull(pgPassword, "ConnectionInfo.Builder.pgPassword cannot be null!");
             this.pgPassword = pgPassword;
             return this;
         }
@@ -135,7 +155,13 @@ public class ConnectionInfo {
          * @return the builder.
          */
         public Builder setDatabase(String database) {
+            Objects.requireNonNull(database, "ConnectionInfo.Builder.database cannot be null!");
             this.database = database;
+            return this;
+        }
+
+        public Builder addConnectionProperty(PGProperty pgProperty, String value) {
+            connectionProperties.put(pgProperty, value);
             return this;
         }
 
@@ -154,7 +180,8 @@ public class ConnectionInfo {
                 this.port,
                 this.pgUsername,
                 this.pgPassword,
-                this.database);
+                this.database,
+                Collections.unmodifiableMap(connectionProperties));
         }
     }
 }
