@@ -1,5 +1,6 @@
 package org.aurinkopg.postgresql;
 
+import org.aurinkopg.GlobalConstants;
 import org.aurinkopg.Snapshot;
 import org.postgresql.PGProperty;
 import org.postgresql.jdbc.PgConnection;
@@ -56,6 +57,8 @@ public class Database {
         Properties info = new Properties();
         info.putAll(connectionInfo.getConnectionProperties());
         PGProperty.PASSWORD.set(info, connectionInfo.getPgPassword());
+        // TODO Add application version here
+        PGProperty.APPLICATION_NAME.set(info, GlobalConstants.APPLICATION_NAME);
         PgConnection pgConnection = new PgConnection(
             hostSpecs,
             connectionInfo.getPgUsername(),
