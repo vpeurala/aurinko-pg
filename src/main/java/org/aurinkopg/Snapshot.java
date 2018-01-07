@@ -1,8 +1,9 @@
 package org.aurinkopg;
 
-import java.nio.charset.Charset;
 import java.sql.SQLException;
 import java.util.Objects;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class Snapshot {
     private final String name;
@@ -24,7 +25,7 @@ public class Snapshot {
      */
     private void validateSnapshotName(String name) throws IllegalArgumentException {
         Objects.requireNonNull(name, "The name of a Snapshot cannot be null!");
-        int lengthInBytes = name.getBytes(Charset.forName("UTF-8")).length;
+        int lengthInBytes = name.getBytes(UTF_8).length;
         if (lengthInBytes > 63) {
             throw new IllegalArgumentException(
                 "Your snapshot name is too long. " +

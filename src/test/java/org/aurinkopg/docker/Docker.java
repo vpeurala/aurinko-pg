@@ -1,10 +1,9 @@
 package org.aurinkopg.docker;
 
-import org.apache.commons.io.IOUtils;
+import org.aurinkopg.util.JavaTee;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -107,7 +106,7 @@ public class Docker {
         }
         int exitStatus = process.exitValue();
         InputStream inputStream = process.getInputStream();
-        List<String> lines = IOUtils.readLines(inputStream, Charset.forName("UTF-8"));
+        List<String> lines = JavaTee.readLines(inputStream);
         return new Result(lines, exitStatus);
     }
 

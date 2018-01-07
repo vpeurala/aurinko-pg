@@ -12,10 +12,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.Map;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.aurinkopg.TestFixtures.CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER;
 import static org.junit.Assert.assertEquals;
 
@@ -73,7 +73,7 @@ public class IntegrationTest {
     }
 
     private String jsonResource(String resourceName) throws IOException {
-        String resource = IOUtils.resourceToString(resourceName, Charset.forName("UTF-8"));
+        String resource = IOUtils.resourceToString(resourceName, UTF_8);
         JsonNode jsonNode = objectMapper.readTree(resource);
         return objectMapper.writeValueAsString(jsonNode);
     }
