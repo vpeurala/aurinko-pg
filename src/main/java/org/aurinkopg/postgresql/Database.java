@@ -29,7 +29,7 @@ public class Database {
         "AND pid <> pg_backend_pid()";
 
     private final ConnectionInfo connectionInfo;
-    private final PgConnection pgConnection;
+    private final PgConnection mainPgConnection;
 
     /**
      * Not meant to be instantiated via constructor.
@@ -39,7 +39,7 @@ public class Database {
      */
     private Database(ConnectionInfo connectionInfo, PgConnection pgConnection) {
         this.connectionInfo = connectionInfo;
-        this.pgConnection = pgConnection;
+        this.mainPgConnection = pgConnection;
     }
 
     /**
@@ -89,13 +89,13 @@ public class Database {
     }
 
     public Connection getConnection() {
-        return pgConnection;
+        return mainPgConnection;
     }
 
     private void dropDatabase(String databaseName) throws SQLException {
         killAllOtherConnectionsToDatabase(databaseName);
         String sql = String.format(DROP_DATABASE_SQL, databaseName);
-        pgConnection.execSQLUpdate(sql);
+        mainPgConnection.execSQLUpdate(sql);
     }
 
     private void copyDatabaseToSnapshot(String snapshotName, String database) throws SQLException {
@@ -108,14 +108,14 @@ public class Database {
             snapshotName,
             database,
             connectionInfo.getPgUsername());
-        pgConnection.execSQLUpdate(sql);
+        mainPgConnection.execSQLUpdate(sql);
     }
 
     private void killAllOtherConnectionsToDatabase(String databaseName) throws SQLException {
         String sql = String.format(
             KILL_ALL_OTHER_CONNECTIONS_SQL,
             databaseName);
-        PgStatement pgStatement = (PgStatement) pgConnection.createStatement(
+        PgStatement pgStatement = (PgStatement) mainPgConnection.createStatement(
             TYPE_FORWARD_ONLY,
             CONCUR_READ_ONLY,
             CLOSE_CURSORS_AT_COMMIT);
@@ -127,7 +127,7 @@ public class Database {
             DOES_DATABASE_EXIST_SQL,
             databaseName
         );
-        ResultSet resultSet = pgConnection.execSQLQuery(sql, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+        ResultSet resultSet = mainPgConnection.execSQLQuery(sql, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
         return resultSet.next();
     }
 }
