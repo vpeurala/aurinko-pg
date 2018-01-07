@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.aurinkopg.TestFixtures.TEST_DOCKER_CONTAINER_NAME;
+import static org.aurinkopg.TestFixtures.TEST_DOCKER_IMAGE_NAME;
 import static org.junit.Assert.assertEquals;
 
 public class DockerTest {
@@ -29,5 +30,15 @@ public class DockerTest {
     @Test
     public void dockerContainerJaanmurtajaDbIsRunning() throws Exception {
         assertEquals(true, new Docker().isDockerContainerRunning(TEST_DOCKER_CONTAINER_NAME));
+    }
+
+    @Test
+    public void dockerImageAurinkoPostgreSQLIsFound() throws Exception {
+        assertEquals(true, new Docker().doesDockerImageExist(TEST_DOCKER_IMAGE_NAME));
+    }
+
+    @Test
+    public void testBuildDockerContainer() throws Exception {
+        assertEquals(0, new Docker().buildImage(TEST_DOCKER_IMAGE_NAME).getExitStatus());
     }
 }

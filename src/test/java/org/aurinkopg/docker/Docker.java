@@ -13,6 +13,8 @@ import java.util.concurrent.TimeUnit;
 
 import static java.lang.ProcessBuilder.Redirect.INHERIT;
 import static java.lang.ProcessBuilder.Redirect.PIPE;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 public class Docker {
     private final ProcessBuilder processBuilder;
@@ -30,14 +32,34 @@ public class Docker {
             redirectOutput(PIPE);
     }
 
-    public boolean isDockerInstalledAndFoundOnPath() throws InterruptedException, IOException {
+    public boolean isDockerInstalledAndFoundOnPath() throws IOException, InterruptedException {
         processBuilder.
             command("which", "docker");
-        Result result = runWithTimeout();
+        Result result = runWithShortTimeout();
         return (result.exitStatus == 0);
     }
 
-    public boolean isDockerContainerRunning(String containerName) throws InterruptedException, IOException {
+    public boolean doesDockerImageExist(String imageName) throws IOException, InterruptedException {
+        processBuilder.command(
+            "docker",
+            "images",
+            "--filter",
+            "reference=" + imageName,
+            "--format", "{{.Repository}}:{{.Tag}}",
+            "--no-trunc");
+        Result result = runWithShortTimeout();
+        Optional<String> output = result.output.stream().reduce((s1, s2) -> s1 + s2);
+        return (output.isPresent() && output.get().startsWith(imageName));
+    }
+
+    public Result buildImage(String imageName) throws IOException, InterruptedException {
+        processBuilder.command(
+            "./docker/build.sh"
+        );
+        return runWithLongTimeout();
+    }
+
+    public boolean isDockerContainerRunning(String containerName) throws IOException, InterruptedException {
         processBuilder.command(
             "docker",
             "ps",
@@ -46,17 +68,27 @@ public class Docker {
             "name=" + containerName + "",
             "--format", "{{.Names}}: {{.Status}}",
             "--no-trunc");
-        Result result = runWithTimeout();
-        // TODO Remove sysout debug logging
-        System.out.println(result);
+        Result result = runWithShortTimeout();
         Optional<String> output = result.output.stream().reduce((s1, s2) -> s1 + s2);
         return (output.isPresent() && output.get().startsWith(containerName + ": Up"));
     }
 
+    public void buildImageAndStartContainer() throws IOException, InterruptedException {
+        processBuilder.command("./docker/build.sh");
+        runWithTimeout(10, MINUTES);
+    }
 
-    private Result runWithTimeout() throws InterruptedException, IOException {
+    private Result runWithShortTimeout() throws IOException, InterruptedException {
+        return runWithTimeout(2, SECONDS);
+    }
+
+    private Result runWithLongTimeout() throws IOException, InterruptedException {
+        return runWithTimeout(10, MINUTES);
+    }
+
+    private Result runWithTimeout(long timeout, TimeUnit unit) throws IOException, InterruptedException {
         Process process = processBuilder.start();
-        boolean hasExited = process.waitFor(3, TimeUnit.SECONDS);
+        boolean hasExited = process.waitFor(timeout, unit);
         if (!hasExited) {
             process.destroyForcibly();
         }
