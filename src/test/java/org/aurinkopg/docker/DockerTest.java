@@ -5,6 +5,7 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.aurinkopg.TestFixtures.TEST_DOCKER_CONTAINER_NAME;
 import static org.junit.Assert.assertEquals;
 
 public class DockerTest {
@@ -23,5 +24,10 @@ public class DockerTest {
         Map<String, String> environment = new HashMap<>();
         environment.put("PATH", "");
         assertEquals(false, new Docker(environment).isDockerInstalledAndFoundOnPath());
+    }
+
+    @Test
+    public void dockerContainerJaanmurtajaDbIsRunning() throws Exception {
+        assertEquals(true, new Docker().isDockerContainerRunning(TEST_DOCKER_CONTAINER_NAME));
     }
 }
