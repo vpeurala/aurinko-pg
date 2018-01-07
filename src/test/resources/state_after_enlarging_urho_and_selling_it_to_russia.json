@@ -1,0 +1,134 @@
+[
+  {
+    "laiva_id": 1,
+    "laiva_nimi": "Voima",
+    "laiva_valmistumisvuosi": 1954,
+    "laiva_akseliteho": 10.2,
+    "laiva_vetoisuus": 4159,
+    "laiva_pituus": 83.5,
+    "laiva_leveys": 19.4,
+    "valtio_id": 1,
+    "valtio_nimi": "Suomi"
+  },
+  {
+    "laiva_id": 3,
+    "laiva_nimi": "Sisu",
+    "laiva_valmistumisvuosi": 1976,
+    "laiva_akseliteho": 16.2,
+    "laiva_vetoisuus": 7525,
+    "laiva_pituus": 106.6,
+    "laiva_leveys": 23.8,
+    "valtio_id": 1,
+    "valtio_nimi": "Suomi"
+  },
+  {
+    "laiva_id": 4,
+    "laiva_nimi": "Otso",
+    "laiva_valmistumisvuosi": 1986,
+    "laiva_akseliteho": 15,
+    "laiva_vetoisuus": 7066,
+    "laiva_pituus": 99,
+    "laiva_leveys": 24.2,
+    "valtio_id": 1,
+    "valtio_nimi": "Suomi"
+  },
+  {
+    "laiva_id": 5,
+    "laiva_nimi": "Kontio",
+    "laiva_valmistumisvuosi": 1987,
+    "laiva_akseliteho": 15,
+    "laiva_vetoisuus": 7066,
+    "laiva_pituus": 99,
+    "laiva_leveys": 24.2,
+    "valtio_id": 1,
+    "valtio_nimi": "Suomi"
+  },
+  {
+    "laiva_id": 6,
+    "laiva_nimi": "Nordica",
+    "laiva_valmistumisvuosi": 1994,
+    "laiva_akseliteho": 15,
+    "laiva_vetoisuus": 9088,
+    "laiva_pituus": 116,
+    "laiva_leveys": 26,
+    "valtio_id": 1,
+    "valtio_nimi": "Suomi"
+  },
+  {
+    "laiva_id": 7,
+    "laiva_nimi": "Fennica",
+    "laiva_valmistumisvuosi": 1993,
+    "laiva_akseliteho": 15,
+    "laiva_vetoisuus": 9088,
+    "laiva_pituus": 116,
+    "laiva_leveys": 26,
+    "valtio_id": 1,
+    "valtio_nimi": "Suomi"
+  },
+  {
+    "laiva_id": 8,
+    "laiva_nimi": "Polaris",
+    "laiva_valmistumisvuosi": 2016,
+    "laiva_akseliteho": 19,
+    "laiva_vetoisuus": 9300,
+    "laiva_pituus": 110,
+    "laiva_leveys": 24.4,
+    "valtio_id": 1,
+    "valtio_nimi": "Suomi"
+  },
+  {
+    "laiva_id": 9,
+    "laiva_nimi": "Rossija",
+    "laiva_valmistumisvuosi": 1985,
+    "laiva_akseliteho": 52,
+    "laiva_vetoisuus": 18172,
+    "laiva_pituus": 148,
+    "laiva_leveys": 30,
+    "valtio_id": 2,
+    "valtio_nimi": "Venäjä"
+  },
+  {
+    "laiva_id": 10,
+    "laiva_nimi": "Sovjetski Sojuz",
+    "laiva_valmistumisvuosi": 1990,
+    "laiva_akseliteho": 52,
+    "laiva_vetoisuus": 18172,
+    "laiva_pituus": 148,
+    "laiva_leveys": 30,
+    "valtio_id": 2,
+    "valtio_nimi": "Venäjä"
+  },
+  {
+    "laiva_id": 11,
+    "laiva_nimi": "Jamal",
+    "laiva_valmistumisvuosi": 1992,
+    "laiva_akseliteho": 52,
+    "laiva_vetoisuus": 18172,
+    "laiva_pituus": 148,
+    "laiva_leveys": 30,
+    "valtio_id": 2,
+    "valtio_nimi": "Venäjä"
+  },
+  {
+    "laiva_id": 12,
+    "laiva_nimi": "Let Pobedy",
+    "laiva_valmistumisvuosi": 2007,
+    "laiva_akseliteho": 52,
+    "laiva_vetoisuus": 18172,
+    "laiva_pituus": 148,
+    "laiva_leveys": 30,
+    "valtio_id": 2,
+    "valtio_nimi": "Venäjä"
+  },
+  {
+    "laiva_id": 2,
+    "laiva_nimi": "Urho",
+    "laiva_valmistumisvuosi": 1975,
+    "laiva_akseliteho": 16.2,
+    "laiva_vetoisuus": 7525,
+    "laiva_pituus": 220,
+    "laiva_leveys": 42,
+    "valtio_id": 2,
+    "valtio_nimi": "Venäjä"
+  }
+]

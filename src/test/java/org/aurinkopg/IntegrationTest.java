@@ -48,41 +48,41 @@ public class IntegrationTest {
 
     @Test
     public void takingSnapshotDoesNotChangeData() throws Exception {
-        try {
-            String beforeSnapshot = doSelect(jdbc);
-            snapshot = database.takeSnapshot("snapshot1");
-            String afterSnapshot = doSelect(jdbc);
-            assertEquals(beforeSnapshot, afterSnapshot);
-        } finally {
-            if (snapshot != null) {
-                database.deleteSnapshot(snapshot);
-            }
-        }
+        String beforeSnapshot = selectDatabaseState();
+        snapshot = database.takeSnapshot("snapshot1");
+        String afterSnapshot = selectDatabaseState();
+        assertEquals(beforeSnapshot, afterSnapshot);
+        database.deleteSnapshot(snapshot);
     }
 
     @Test
     public void restoringSnapshotRestoresAllDataBackToOriginal() throws Exception {
-        try {
-            String beforeSnapshot = doSelect(jdbc);
-            assertEquals(initialStateJson(), beforeSnapshot);
-            snapshot = database.takeSnapshot("snapshot1");
-            String afterSnapshot = doSelect(jdbc);
-            assertEquals(beforeSnapshot, afterSnapshot);
-        } finally {
-            if (snapshot != null) {
-                database.deleteSnapshot(snapshot);
-            }
-        }
+        String beforeSnapshot = selectDatabaseState();
+        assertEquals(initialStateJson(), beforeSnapshot);
+        snapshot = database.takeSnapshot("snapshot1");
+        enlargeUrhoAndSellItToRussia();
+        assertEquals(jsonResource("/state_after_enlarging_urho_and_selling_it_to_russia.json"), selectDatabaseState());
+        database.restoreSnapshot(snapshot);
+        assertEquals(initialStateJson(), selectDatabaseState());
+        database.deleteSnapshot(snapshot);
     }
 
     private String initialStateJson() throws IOException {
-        String resource = IOUtils.resourceToString("/initial_state.json", Charset.forName("UTF-8"));
+        return jsonResource("/initial_state.json");
+    }
+
+    private String jsonResource(String resourceName) throws IOException {
+        String resource = IOUtils.resourceToString(resourceName, Charset.forName("UTF-8"));
         JsonNode jsonNode = objectMapper.readTree(resource);
         return objectMapper.writeValueAsString(jsonNode);
     }
 
-    private String doSelect(JdbcTemplate jdbc) throws JsonProcessingException {
+    private String selectDatabaseState() throws JsonProcessingException {
         List<Map<String, Object>> queryResult = jdbc.queryForList(TEST_SELECT);
         return objectMapper.writeValueAsString(queryResult);
+    }
+
+    private void enlargeUrhoAndSellItToRussia() {
+        jdbc.update("UPDATE laiva SET pituus = 220, leveys = 42, omistaja = (SELECT id FROM valtio WHERE nimi = 'Venäjä') WHERE nimi = 'Urho'");
     }
 }

@@ -7,6 +7,7 @@ import org.postgresql.jdbc.PgStatement;
 import org.postgresql.util.HostSpec;
 
 import java.sql.Connection;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Properties;
@@ -19,6 +20,7 @@ import static org.postgresql.core.QueryExecutor.QUERY_NO_RESULTS;
  */
 public class Database {
     private static final String COPY_DATABASE_SQL = "CREATE DATABASE %s WITH TEMPLATE '%s' OWNER '%s'";
+    private static final String DOES_DATABASE_EXIST_SQL = "select 1 from pg_database where datname = '%s'";
     private static final String DROP_DATABASE_SQL = "DROP DATABASE %s";
     private static final String KILL_ALL_OTHER_CONNECTIONS_SQL = "SELECT pg_terminate_backend(pg_stat_activity.pid) " +
         "FROM pg_stat_activity " +
@@ -67,26 +69,37 @@ public class Database {
 
     public Snapshot takeSnapshot(String snapshotName) throws SQLException {
         Snapshot snapshot = new Snapshot(snapshotName);
-        killAllOtherConnectionsToDatabase();
+        killAllOtherConnectionsToDatabase(connectionInfo.getDatabase());
         copyDatabaseToSnapshot(snapshot.getName(), connectionInfo.getDatabase());
         return snapshot;
     }
 
     public void restoreSnapshot(Snapshot snapshot) throws SQLException {
-        killAllOtherConnectionsToDatabase();
+        // TODO: How to "drop" the current database and copy the data from the snapshot into it?
+        dropDatabase(connectionInfo.getDatabase());
+        killAllOtherConnectionsToDatabase(snapshot.getName());
         copyDatabaseToSnapshot(connectionInfo.getDatabase(), snapshot.getName());
     }
 
     public void deleteSnapshot(Snapshot snapshot) throws SQLException {
-        String sql = String.format(DROP_DATABASE_SQL, snapshot.getName());
-        pgConnection.execSQLUpdate(sql);
+        dropDatabase(snapshot.getName());
     }
 
     public Connection getConnection() {
         return pgConnection;
     }
 
+    private void dropDatabase(String databaseName) throws SQLException {
+        killAllOtherConnectionsToDatabase(databaseName);
+        String sql = String.format(DROP_DATABASE_SQL, databaseName);
+        pgConnection.execSQLUpdate(sql);
+    }
+
     private void copyDatabaseToSnapshot(String snapshotName, String database) throws SQLException {
+        if (doesDatabaseExist(snapshotName)) {
+            dropDatabase(snapshotName);
+        }
+        killAllOtherConnectionsToDatabase(database);
         String sql = String.format(
             COPY_DATABASE_SQL,
             snapshotName,
@@ -95,14 +108,23 @@ public class Database {
         pgConnection.execSQLUpdate(sql);
     }
 
-    private void killAllOtherConnectionsToDatabase() throws SQLException {
+    private void killAllOtherConnectionsToDatabase(String databaseName) throws SQLException {
         String sql = String.format(
             KILL_ALL_OTHER_CONNECTIONS_SQL,
-            connectionInfo.getDatabase());
+            databaseName);
         PgStatement pgStatement = (PgStatement) pgConnection.createStatement(
             TYPE_FORWARD_ONLY,
             CONCUR_READ_ONLY,
             CLOSE_CURSORS_AT_COMMIT);
         pgStatement.executeWithFlags(sql, QUERY_NO_RESULTS);
+    }
+
+    private boolean doesDatabaseExist(String databaseName) throws SQLException {
+        String sql = String.format(
+            DOES_DATABASE_EXIST_SQL,
+            databaseName
+        );
+        ResultSet resultSet = pgConnection.execSQLQuery(sql, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+        return resultSet.next();
     }
 }
