@@ -6,7 +6,6 @@ import org.postgresql.jdbc.PgConnection;
 import org.postgresql.jdbc.PgStatement;
 import org.postgresql.util.HostSpec;
 
-import java.nio.charset.Charset;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Objects;
@@ -67,10 +66,10 @@ public class Database {
     }
 
     public Snapshot takeSnapshot(String snapshotName) throws SQLException {
-        validateSnapshotName(snapshotName);
+        Snapshot snapshot = new Snapshot(snapshotName);
         killAllOtherConnectionsToDatabase();
-        copyDatabaseToSnapshot(snapshotName, connectionInfo.getDatabase());
-        return new Snapshot(snapshotName);
+        copyDatabaseToSnapshot(snapshot.getName(), connectionInfo.getDatabase());
+        return snapshot;
     }
 
     public void restoreSnapshot(Snapshot snapshot) throws SQLException {
@@ -85,35 +84,6 @@ public class Database {
 
     public Connection getConnection() {
         return pgConnection;
-    }
-
-    /**
-     * See https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS.
-     *
-     * @param snapshotName a name you would like to use as a snapshot DB name.
-     * @throws SQLException if the name does not conform to the rules.
-     */
-    private void validateSnapshotName(String snapshotName) throws SQLException {
-        int lengthInBytes = snapshotName.getBytes(Charset.forName("UTF-8")).length;
-        if (lengthInBytes > 63) {
-            throw new SQLException(
-                "Your snapshot name is too long. " +
-                    "The maximum length is 63 bytes. " +
-                    "You tried to use '" +
-                    snapshotName +
-                    "', which is " +
-                    lengthInBytes +
-                    " bytes long.");
-        }
-        if (snapshotName.isEmpty()) {
-            throw new SQLException("You tried to use an empty string as a snapshot name.");
-        }
-        if (!snapshotName.matches("[A-Za-z_][A-Za-z0-9_]*")) {
-            throw new SQLException("Your snapshot name '" +
-                snapshotName +
-                "'did not match the pattern of acceptable database names. " +
-                "See https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS for the rules.");
-        }
     }
 
     private void copyDatabaseToSnapshot(String snapshotName, String database) throws SQLException {
