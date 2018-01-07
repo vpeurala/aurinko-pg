@@ -1,5 +1,8 @@
 package org.aurinkopg;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.aurinkopg.postgresql.Database;
 import org.junit.Before;
 import org.junit.Test;
@@ -10,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static org.aurinkopg.TestFixtures.CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER;
+import static org.junit.Assert.assertEquals;
 
 public class IntegrationTest {
     private Database database;
@@ -23,11 +27,12 @@ public class IntegrationTest {
     }
 
     @Test
-    public void integrationTest() throws Exception {
+    public void takingSnapshotDoesNotChangeData() throws Exception {
         try {
-            doSelect(jdbc);
+            String beforeSnapshot = doSelect(jdbc);
             snapshot = database.takeSnapshot("snapshot1");
-            doSelect(jdbc);
+            String afterSnapshot = doSelect(jdbc);
+            assertEquals(beforeSnapshot, afterSnapshot);
         } finally {
             if (snapshot != null) {
                 database.deleteSnapshot(snapshot);
@@ -35,8 +40,9 @@ public class IntegrationTest {
         }
     }
 
-    private void doSelect(JdbcTemplate jdbc) {
+    private String doSelect(JdbcTemplate jdbc) throws JsonProcessingException {
         List<Map<String, Object>> queryResult = jdbc.queryForList("SELECT * FROM laiva JOIN valtio ON laiva.omistaja = valtio.id");
-        System.out.println(queryResult);
+        ObjectMapper objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
+        return objectMapper.writeValueAsString(queryResult);
     }
 }
