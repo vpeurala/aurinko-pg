@@ -11,6 +11,17 @@
     "valtio_nimi": "Suomi"
   },
   {
+    "laiva_id": 2,
+    "laiva_nimi": "Urho",
+    "laiva_valmistumisvuosi": 1975,
+    "laiva_akseliteho": 16.2,
+    "laiva_vetoisuus": 7525,
+    "laiva_pituus": 220,
+    "laiva_leveys": 42,
+    "valtio_id": 2,
+    "valtio_nimi": "Venäjä"
+  },
+  {
     "laiva_id": 3,
     "laiva_nimi": "Sisu",
     "laiva_valmistumisvuosi": 1976,
@@ -117,17 +128,6 @@
     "laiva_vetoisuus": 18172,
     "laiva_pituus": 148,
     "laiva_leveys": 30,
-    "valtio_id": 2,
-    "valtio_nimi": "Venäjä"
-  },
-  {
-    "laiva_id": 2,
-    "laiva_nimi": "Urho",
-    "laiva_valmistumisvuosi": 1975,
-    "laiva_akseliteho": 16.2,
-    "laiva_vetoisuus": 7525,
-    "laiva_pituus": 220,
-    "laiva_leveys": 42,
     "valtio_id": 2,
     "valtio_nimi": "Venäjä"
   }

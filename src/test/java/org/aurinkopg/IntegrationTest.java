@@ -32,7 +32,8 @@ public class IntegrationTest {
             "valtio.nimi AS valtio_nimi " +
             "FROM laiva " +
             "INNER JOIN valtio " +
-            "ON laiva.omistaja = valtio.id";
+            "ON laiva.omistaja = valtio.id " +
+            "ORDER BY laiva_id";
 
     private Database database;
     private JdbcTemplate jdbc;
