@@ -80,8 +80,6 @@ public class Database {
 
     public void deleteSnapshot(Snapshot snapshot) throws SQLException {
         String sql = String.format(DROP_DATABASE_SQL, snapshot.getName());
-        // TODO Remove debug logging
-        System.out.println("sql:\n" + sql + "\n");
         pgConnection.execSQLUpdate(sql);
     }
 
@@ -124,8 +122,6 @@ public class Database {
             snapshotName,
             database,
             connectionInfo.getPgUsername());
-        // TODO Remove debug logging
-        System.out.println("sql:\n" + sql + "\n");
         pgConnection.execSQLUpdate(sql);
     }
 
@@ -133,8 +129,6 @@ public class Database {
         String sql = String.format(
             KILL_ALL_OTHER_CONNECTIONS_SQL,
             connectionInfo.getDatabase());
-        // TODO Remove debug logging
-        System.out.println("sql:\n" + sql + "\n");
         PgStatement pgStatement = (PgStatement) pgConnection.createStatement(
             TYPE_FORWARD_ONLY,
             CONCUR_READ_ONLY,
