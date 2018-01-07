@@ -84,6 +84,6 @@ public class IntegrationTest {
     }
 
     private void enlargeUrhoAndSellItToRussia() {
-        jdbc.update("UPDATE laiva SET pituus = 220, leveys = 42, omistaja = (SELECT id FROM valtio WHERE nimi = 'Venäjä') WHERE nimi = 'Urho'");
+        jdbc.update("UPDATE laiva SET pituus = 220, leveys = 42, vetoisuus = 20000, omistaja = (SELECT id FROM valtio WHERE nimi = 'Venäjä') WHERE nimi = 'Urho'");
     }
 }
