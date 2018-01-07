@@ -3,6 +3,7 @@ package org.aurinkopg.postgresql;
 import org.aurinkopg.Snapshot;
 import org.postgresql.PGProperty;
 import org.postgresql.jdbc.PgConnection;
+import org.postgresql.jdbc.PgStatement;
 import org.postgresql.util.HostSpec;
 
 import java.nio.charset.Charset;
@@ -10,6 +11,9 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Objects;
 import java.util.Properties;
+
+import static java.sql.ResultSet.*;
+import static org.postgresql.core.QueryExecutor.QUERY_NO_RESULTS;
 
 /**
  * Contains PostgreSQL database operations.
@@ -131,6 +135,10 @@ public class Database {
             connectionInfo.getDatabase());
         // TODO Remove debug logging
         System.out.println("sql:\n" + sql + "\n");
-        pgConnection.execSQLUpdate(sql);
+        PgStatement pgStatement = (PgStatement) pgConnection.createStatement(
+            TYPE_FORWARD_ONLY,
+            CONCUR_READ_ONLY,
+            CLOSE_CURSORS_AT_COMMIT);
+        pgStatement.executeWithFlags(sql, QUERY_NO_RESULTS);
     }
 }
