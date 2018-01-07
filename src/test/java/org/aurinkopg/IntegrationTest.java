@@ -1,7 +1,7 @@
 package org.aurinkopg;
 
-import org.aurinkopg.postgresql.ConnectionInfo;
 import org.aurinkopg.postgresql.Database;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.SingleConnectionDataSource;
@@ -9,28 +9,28 @@ import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 import java.util.List;
 import java.util.Map;
 
-import static org.aurinkopg.TestData.*;
+import static org.aurinkopg.TestFixtures.CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER;
 
 public class IntegrationTest {
+    private Database database;
+    private Snapshot snapshot;
+    private JdbcTemplate jdbc;
+
+    @Before
+    public void setUp() throws Exception {
+        database = Database.connect(CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER.build());
+        jdbc = new JdbcTemplate(new SingleConnectionDataSource(database.getConnection(), false));
+    }
+
     @Test
     public void integrationTest() throws Exception {
-        ConnectionInfo connectionInfo = new ConnectionInfo.Builder()
-            .setHost("0.0.0.0")
-            .setPort(5432)
-            .setPgUsername(POSTGRES_USERNAME)
-            .setPgPassword(POSTGRES_PASSWORD)
-            .setDatabase(POSTGRES_DATABASE)
-            .build();
-        Database db = Database.connect(connectionInfo);
-        Snapshot snapshot1 = null;
         try {
-            JdbcTemplate jdbc = new JdbcTemplate(new SingleConnectionDataSource(db.getConnection(), true));
             doSelect(jdbc);
-            snapshot1 = db.takeSnapshot("snapshot1");
+            snapshot = database.takeSnapshot("snapshot1");
             doSelect(jdbc);
         } finally {
-            if (snapshot1 != null) {
-                db.deleteSnapshot(snapshot1);
+            if (snapshot != null) {
+                database.deleteSnapshot(snapshot);
             }
         }
     }
