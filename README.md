@@ -19,3 +19,4 @@ A funny coincidence is that Stellar and Aurinko are both from Helsinki, Finland.
 
 * Initialize the database state in the beginning of test runs, before running a single test. Use Docker for this.
 * Versioning policy so that version is specified in only one place.
+* Check that the PostgreSQL user used has superuser privileges.
