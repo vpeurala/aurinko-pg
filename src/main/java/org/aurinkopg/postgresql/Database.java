@@ -7,8 +7,6 @@ import org.postgresql.jdbc.PgConnection;
 import org.postgresql.jdbc.PgStatement;
 import org.postgresql.util.HostSpec;
 
-import javax.sql.DataSource;
-import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
@@ -34,8 +32,7 @@ public class Database implements AutoCloseable {
         "WHERE pg_stat_activity.datname = '%s' " +
         "AND pid <> pg_backend_pid()";
 
-    private final ConnectionInfo connectionInfo;
-    private DataSource dataSource;
+    private final ConnectionInfo originalConnectionInfo;
     private PgConnection connection;
 
     /**
@@ -45,22 +42,8 @@ public class Database implements AutoCloseable {
      * @param connectionInfo connection info.
      */
     private Database(ConnectionInfo connectionInfo) throws SQLException {
-        this.connectionInfo = connectionInfo;
-        this.connection = openPgConnection();
-    }
-
-    /**
-     * Not meant to be instantiated via constructor.
-     * Use factory method {@link #connect(ConnectionInfo, DataSource)}.
-     *
-     * @param connectionInfo connection info.
-     * @param dataSource     a DataSource which provides connections to a PostgreSQL database.
-     *                       This does not work with other databases.
-     */
-    private Database(ConnectionInfo connectionInfo, DataSource dataSource) throws SQLException {
-        this.connectionInfo = connectionInfo;
-        this.dataSource = dataSource;
-        this.connection = openPgConnection();
+        this.originalConnectionInfo = connectionInfo;
+        this.connection = openPgConnection(this.originalConnectionInfo);
     }
 
     /**
@@ -76,43 +59,22 @@ public class Database implements AutoCloseable {
         return new Database(connectionInfo);
     }
 
-    public static Database connect(ConnectionInfo connectionInfo, DataSource dataSource) throws SQLException {
-        Objects.requireNonNull(connectionInfo, "Parameter connectionInfo in Database.connect(connectionInfo, dataSource) cannot be null!");
-        Objects.requireNonNull(dataSource, "Parameter dataSource in Database.connect(connectionInfo, dataSource) cannot be null!");
-        Connection connection = dataSource.getConnection();
-        if (!(connection instanceof PgConnection)) {
-            throw new IllegalStateException(
-                "Aurinko-pg only supports PostgreSQL and its class PgConnection. " +
-                    "The type of connection obtained from the DataSource was: " +
-                    connection.getClass() + ", which is not the correct type. " +
-                    "Maybe the DataSource was configured for a different database than PostgreSQL?");
-        }
-        return new Database(connectionInfo, dataSource);
-    }
-
     public Snapshot takeSnapshot(String snapshotName) throws SQLException {
         Snapshot snapshot = new Snapshot(snapshotName);
-        killAllOtherConnectionsToDatabase(connectionInfo.getDatabase());
-        copyDatabase(connectionInfo.getDatabase(), snapshot.getName());
+        killAllOtherConnectionsToDatabase(originalConnectionInfo.getDatabase());
+        copyDatabase(originalConnectionInfo.getDatabase(), snapshot.getName());
         return snapshot;
     }
 
     public void restoreSnapshot(Snapshot snapshot) throws Exception {
-        // TODO: How to "drop" the current database and copy the data from the snapshot into it?
         // First, we close the current connection and open another connection into the snapshot db.
         // Store the main database name first.
-        ConnectionInfo originalConnectionInfo = connectionInfo;
-        ConnectionInfo snapshotConnectionInfo =
-            ConnectionInfo.Builder.from(connectionInfo).setDatabase(snapshot.getName()).build();
-        // TODO How to open a connection from the DataSource to a different database?
-        // this.connection = openPgConnection(snapshotConnectionInfo);
-        this.connection = openPgConnection();
+        ConnectionInfo originalConnectionInfo = this.originalConnectionInfo;
+        this.connection = openPgConnection(connectionInfoForSnapshot(snapshot));
         dropDatabase(originalConnectionInfo.getDatabase());
         killAllOtherConnectionsToDatabase(snapshot.getName());
         copyDatabase(snapshot.getName(), originalConnectionInfo.getDatabase());
-        // TODO How to open a connection from the DataSource to a different database?
-        // this.connection = openPgConnection(originalConnectionInfo);
-        this.connection = openPgConnection();
+        this.connection = openPgConnection(originalConnectionInfo);
     }
 
     public void deleteSnapshot(Snapshot snapshot) throws SQLException {
@@ -147,7 +109,7 @@ public class Database implements AutoCloseable {
             COPY_DATABASE_SQL,
             to,
             from,
-            connectionInfo.getPgUsername());
+            originalConnectionInfo.getPgUsername());
         connection.execSQLUpdate(sql);
         connection.setAutoCommit(false);
         connection.commit();
@@ -173,39 +135,28 @@ public class Database implements AutoCloseable {
         return resultSet.next();
     }
 
-    // TODO: This method should be parameterized by the database which we want to connect to.
-    private PgConnection openPgConnection() throws SQLException {
-        if (dataSource != null) {
-            Connection connection =
-                dataSource.getConnection(
-                    connectionInfo.getPgUsername(),
-                    connectionInfo.getPgPassword());
-            if (!(connection instanceof PgConnection)) {
-                throw new IllegalStateException(
-                    "Aurinko-pg only supports PostgreSQL and its class PgConnection. " +
-                        "The type of connection obtained from the DataSource was: " +
-                        connection.getClass() + ", which is not the correct type. " +
-                        "Maybe the DataSource was configured for a different database than PostgreSQL?");
-            } else {
-                this.connection = (PgConnection) connection;
-                return this.connection;
-            }
-        } else {
-            HostSpec hostSpec = new HostSpec(connectionInfo.getHost(), connectionInfo.getPort());
-            HostSpec[] hostSpecs = new HostSpec[]{hostSpec};
-            Properties info = new Properties();
-            info.putAll(connectionInfo.getConnectionProperties());
-            PGProperty.PASSWORD.set(info, connectionInfo.getPgPassword());
-            // TODO Add application version here
-            PGProperty.APPLICATION_NAME.set(info, GlobalConstants.APPLICATION_NAME);
-            PgConnection pgConnection = new PgConnection(
-                hostSpecs,
-                connectionInfo.getPgUsername(),
-                connectionInfo.getDatabase(),
-                info,
-                connectionInfo.getJdbcUrl());
-            pgConnection.setAutoCommit(false);
-            return this.connection;
-        }
+    private ConnectionInfo connectionInfoForSnapshot(Snapshot snapshot) {
+        return ConnectionInfo.Builder.
+            from(originalConnectionInfo).
+            setDatabase(snapshot.getName()).
+            build();
+    }
+
+    private PgConnection openPgConnection(ConnectionInfo localConnectionInfo) throws SQLException {
+        HostSpec hostSpec = new HostSpec(localConnectionInfo.getHost(), localConnectionInfo.getPort());
+        HostSpec[] hostSpecs = new HostSpec[]{hostSpec};
+        Properties info = new Properties();
+        info.putAll(localConnectionInfo.getConnectionProperties());
+        PGProperty.PASSWORD.set(info, localConnectionInfo.getPgPassword());
+        // TODO Add application version here
+        PGProperty.APPLICATION_NAME.set(info, GlobalConstants.APPLICATION_NAME);
+        PgConnection pgConnection = new PgConnection(
+            hostSpecs,
+            localConnectionInfo.getPgUsername(),
+            localConnectionInfo.getDatabase(),
+            info,
+            localConnectionInfo.getJdbcUrl());
+        pgConnection.setAutoCommit(false);
+        return this.connection;
     }
 }
