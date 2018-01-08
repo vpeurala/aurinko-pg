@@ -8,13 +8,22 @@ import org.apache.commons.io.IOUtils;
 import org.aurinkopg.datasourceadapter.DataSourceAdapter;
 import org.aurinkopg.postgresql.ConnectionInfo;
 import org.aurinkopg.postgresql.Database;
+import org.aurinkopg.util.FinnishLocaleUtil;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.DataSourceTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.sql.SQLException;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
+import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.Map;
 
@@ -44,12 +53,14 @@ public class IntegrationTest {
     private JdbcTemplate jdbc;
     private ObjectMapper objectMapper;
     private Snapshot snapshot;
+    private DataSourceTransactionManager transactionManager;
 
     @Before
     public void setUp() throws Exception {
         connectionInfo = CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER.build();
         database = Database.connect(connectionInfo);
         dataSource = new DataSourceAdapter(database);
+        transactionManager = new DataSourceTransactionManager(dataSource);
         jdbc = new JdbcTemplate(this.dataSource);
         objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
     }
@@ -89,12 +100,29 @@ public class IntegrationTest {
         return objectMapper.writeValueAsString(jsonNode);
     }
 
-    private String selectDatabaseState() throws JsonProcessingException {
+    private String selectDatabaseState() throws JsonProcessingException, SQLException {
+        database.getConnection();
         List<Map<String, Object>> queryResult = jdbc.queryForList(TEST_SELECT);
         return objectMapper.writeValueAsString(queryResult);
     }
 
+    private TransactionDefinition createTransactionDefinition() {
+        DateTimeFormatter formatter =
+            DateTimeFormatter.
+                ofLocalizedDateTime(FormatStyle.MEDIUM).
+                withLocale(FinnishLocaleUtil.finnishLocale()).
+                withZone(FinnishLocaleUtil.finnishTimeZoneId());
+        Instant now = Instant.now();
+        String formattedNow = formatter.format(now);
+        DefaultTransactionDefinition transactionDefinition = new DefaultTransactionDefinition();
+        transactionDefinition.setReadOnly(false);
+        transactionDefinition.setName("Spring Transaction " + formattedNow);
+        return transactionDefinition;
+    }
+
     private void enlargeUrhoAndSellItToRussia() {
+        TransactionDefinition tx = createTransactionDefinition();
+        TransactionStatus txStatus = this.transactionManager.getTransaction(tx);
         jdbc.update("UPDATE laiva " +
             "SET pituus = 220, " +
             "leveys = 42, " +
@@ -102,5 +130,6 @@ public class IntegrationTest {
             "omistaja = " +
             "(SELECT id FROM valtio WHERE nimi = 'Venäjä') " +
             "WHERE nimi = 'Urho'");
+        this.transactionManager.commit(txStatus);
     }
 }
