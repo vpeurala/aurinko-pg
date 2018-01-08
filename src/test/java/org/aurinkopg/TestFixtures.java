@@ -3,6 +3,8 @@ package org.aurinkopg;
 import org.aurinkopg.postgresql.ConnectionInfo;
 
 public class TestFixtures {
+    public static final String POSTGRES_HOST = "0.0.0.0";
+    public static final Integer POSTGRES_PORT = 5432;
     public static final String POSTGRES_USERNAME = "jaanmurtaja";
     public static final String POSTGRES_PASSWORD = "argxBX4DxWJKC7st";
     public static final String POSTGRES_DATABASE = "jaanmurtaja";
@@ -11,8 +13,8 @@ public class TestFixtures {
 
     public static final ConnectionInfo.Builder CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER =
         new ConnectionInfo.Builder()
-            .setHost("0.0.0.0")
-            .setPort(5432)
+            .setHost(POSTGRES_HOST)
+            .setPort(POSTGRES_PORT)
             .setPgUsername(POSTGRES_USERNAME)
             .setPgPassword(POSTGRES_PASSWORD)
             .setDatabase(POSTGRES_DATABASE);

@@ -73,7 +73,7 @@ public class ConnectionInfo {
     }
 
     public String getJdbcUrl() {
-        return null;
+        return String.format("jdbc:postgresql://%s:%d/%s", host, port, database);
     }
 
     @Override
