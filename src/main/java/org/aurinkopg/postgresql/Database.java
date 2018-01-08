@@ -36,7 +36,7 @@ public class Database implements AutoCloseable {
 
     private final ConnectionInfo connectionInfo;
     private DataSource dataSource;
-    private PgConnection pgConnection;
+    private PgConnection connection;
 
     /**
      * Not meant to be instantiated via constructor.
@@ -46,7 +46,7 @@ public class Database implements AutoCloseable {
      */
     private Database(ConnectionInfo connectionInfo) throws SQLException {
         this.connectionInfo = connectionInfo;
-        this.pgConnection = openPgConnection();
+        this.connection = openPgConnection();
     }
 
     /**
@@ -60,7 +60,7 @@ public class Database implements AutoCloseable {
     private Database(ConnectionInfo connectionInfo, DataSource dataSource) throws SQLException {
         this.connectionInfo = connectionInfo;
         this.dataSource = dataSource;
-        this.pgConnection = openPgConnection();
+        this.connection = openPgConnection();
     }
 
     /**
@@ -105,59 +105,59 @@ public class Database implements AutoCloseable {
         ConnectionInfo snapshotConnectionInfo =
             ConnectionInfo.Builder.from(connectionInfo).setDatabase(snapshot.getName()).build();
         // TODO How to open a connection from the DataSource to a different database?
-        // this.pgConnection = openPgConnection(snapshotConnectionInfo);
-        this.pgConnection = openPgConnection();
+        // this.connection = openPgConnection(snapshotConnectionInfo);
+        this.connection = openPgConnection();
         dropDatabase(originalConnectionInfo.getDatabase());
         killAllOtherConnectionsToDatabase(snapshot.getName());
         copyDatabase(snapshot.getName(), originalConnectionInfo.getDatabase());
         // TODO How to open a connection from the DataSource to a different database?
-        // this.pgConnection = openPgConnection(originalConnectionInfo);
-        this.pgConnection = openPgConnection();
+        // this.connection = openPgConnection(originalConnectionInfo);
+        this.connection = openPgConnection();
     }
 
     public void deleteSnapshot(Snapshot snapshot) throws SQLException {
         dropDatabase(snapshot.getName());
     }
 
-    public Connection getConnection() {
-        return pgConnection;
+    public PgConnection getConnection() {
+        return connection;
     }
 
     @Override
     public void close() throws Exception {
-        pgConnection.close();
+        connection.close();
     }
 
     private void dropDatabase(String databaseName) throws SQLException {
         killAllOtherConnectionsToDatabase(databaseName);
         String sql = String.format(DROP_DATABASE_SQL, databaseName);
-        pgConnection.setAutoCommit(true);
-        pgConnection.execSQLUpdate(sql);
-        pgConnection.setAutoCommit(false);
+        connection.setAutoCommit(true);
+        connection.execSQLUpdate(sql);
+        connection.setAutoCommit(false);
     }
 
     private void copyDatabase(String from, String to) throws SQLException {
         if (doesDatabaseExist(to)) {
             dropDatabase(to);
         }
-        pgConnection.setAutoCommit(false);
+        connection.setAutoCommit(false);
         killAllOtherConnectionsToDatabase(from);
-        pgConnection.setAutoCommit(true);
+        connection.setAutoCommit(true);
         String sql = String.format(
             COPY_DATABASE_SQL,
             to,
             from,
             connectionInfo.getPgUsername());
-        pgConnection.execSQLUpdate(sql);
-        pgConnection.setAutoCommit(false);
-        pgConnection.commit();
+        connection.execSQLUpdate(sql);
+        connection.setAutoCommit(false);
+        connection.commit();
     }
 
     private void killAllOtherConnectionsToDatabase(String databaseName) throws SQLException {
         String sql = String.format(
             KILL_ALL_OTHER_CONNECTIONS_SQL,
             databaseName);
-        PgStatement pgStatement = (PgStatement) pgConnection.createStatement(
+        PgStatement pgStatement = (PgStatement) connection.createStatement(
             TYPE_FORWARD_ONLY,
             CONCUR_READ_ONLY,
             CLOSE_CURSORS_AT_COMMIT);
@@ -169,7 +169,7 @@ public class Database implements AutoCloseable {
             DOES_DATABASE_EXIST_SQL,
             databaseName
         );
-        ResultSet resultSet = pgConnection.execSQLQuery(sql, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
+        ResultSet resultSet = connection.execSQLQuery(sql, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
         return resultSet.next();
     }
 
@@ -187,8 +187,8 @@ public class Database implements AutoCloseable {
                         connection.getClass() + ", which is not the correct type. " +
                         "Maybe the DataSource was configured for a different database than PostgreSQL?");
             } else {
-                this.pgConnection = (PgConnection) connection;
-                return this.pgConnection;
+                this.connection = (PgConnection) connection;
+                return this.connection;
             }
         } else {
             HostSpec hostSpec = new HostSpec(connectionInfo.getHost(), connectionInfo.getPort());
@@ -205,7 +205,7 @@ public class Database implements AutoCloseable {
                 info,
                 connectionInfo.getJdbcUrl());
             pgConnection.setAutoCommit(false);
-            return this.pgConnection;
+            return this.connection;
         }
     }
 }
