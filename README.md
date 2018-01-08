@@ -9,7 +9,7 @@ A snapshot tool for [PostgreSQL](https://www.postgresql.org/) and Java (or other
 
 ## Influenced by Stellar
 
-Aurinko is very much influenced by [Stellar](https://github.com/fastmonkeys/stellar) (https://github.com/fastmonkeys/stellar), which does similar things but is written in Python. Stellar obviously has a lot more features, since it has been in development since 2014.
+Aurinko is influenced by [Stellar](https://github.com/fastmonkeys/stellar) (https://github.com/fastmonkeys/stellar), which does similar things but is written in Python. Stellar obviously has a lot more features, since it has been in development since 2014.
 
 Some of the goals of Aurinko are different from Stellar's: for example, Stellar also supports [MySQL](https://www.mysql.com/), while Aurinko is never going to support any other databases than [PostgreSQL](https://www.postgresql.org/).
 
