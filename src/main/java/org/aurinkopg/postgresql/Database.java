@@ -43,11 +43,10 @@ public class Database implements AutoCloseable {
      * Use factory method {@link #connect(ConnectionInfo)}.
      *
      * @param connectionInfo connection info.
-     * @param pgConnection   an open connection to a PostgreSQL database.
      */
-    private Database(ConnectionInfo connectionInfo, PgConnection pgConnection) {
+    private Database(ConnectionInfo connectionInfo) throws SQLException {
         this.connectionInfo = connectionInfo;
-        this.pgConnection = pgConnection;
+        this.pgConnection = openPgConnection();
     }
 
     /**
@@ -58,9 +57,10 @@ public class Database implements AutoCloseable {
      * @param dataSource     a DataSource which provides connections to a PostgreSQL database.
      *                       This does not work with other databases.
      */
-    private Database(ConnectionInfo connectionInfo, DataSource dataSource) {
+    private Database(ConnectionInfo connectionInfo, DataSource dataSource) throws SQLException {
         this.connectionInfo = connectionInfo;
         this.dataSource = dataSource;
+        this.pgConnection = openPgConnection();
     }
 
     /**
@@ -73,8 +73,7 @@ public class Database implements AutoCloseable {
      */
     public static Database connect(ConnectionInfo connectionInfo) throws SQLException {
         Objects.requireNonNull(connectionInfo, "Parameter connectionInfo in Database.connect(connectionInfo) cannot be null!");
-        PgConnection pgConnection = openPgConnection(connectionInfo);
-        return new Database(connectionInfo, pgConnection);
+        return new Database(connectionInfo);
     }
 
     public static Database connect(ConnectionInfo connectionInfo, DataSource dataSource) throws SQLException {
@@ -105,11 +104,15 @@ public class Database implements AutoCloseable {
         ConnectionInfo originalConnectionInfo = connectionInfo;
         ConnectionInfo snapshotConnectionInfo =
             ConnectionInfo.Builder.from(connectionInfo).setDatabase(snapshot.getName()).build();
-        this.pgConnection = openPgConnection(snapshotConnectionInfo);
+        // TODO How to open a connection from the DataSource to a different database?
+        // this.pgConnection = openPgConnection(snapshotConnectionInfo);
+        this.pgConnection = openPgConnection();
         dropDatabase(originalConnectionInfo.getDatabase());
         killAllOtherConnectionsToDatabase(snapshot.getName());
         copyDatabase(snapshot.getName(), originalConnectionInfo.getDatabase());
-        this.pgConnection = openPgConnection(originalConnectionInfo);
+        // TODO How to open a connection from the DataSource to a different database?
+        // this.pgConnection = openPgConnection(originalConnectionInfo);
+        this.pgConnection = openPgConnection();
     }
 
     public void deleteSnapshot(Snapshot snapshot) throws SQLException {
@@ -170,21 +173,38 @@ public class Database implements AutoCloseable {
         return resultSet.next();
     }
 
-    private static PgConnection openPgConnection(ConnectionInfo connectionInfo) throws SQLException {
-        HostSpec hostSpec = new HostSpec(connectionInfo.getHost(), connectionInfo.getPort());
-        HostSpec[] hostSpecs = new HostSpec[]{hostSpec};
-        Properties info = new Properties();
-        info.putAll(connectionInfo.getConnectionProperties());
-        PGProperty.PASSWORD.set(info, connectionInfo.getPgPassword());
-        // TODO Add application version here
-        PGProperty.APPLICATION_NAME.set(info, GlobalConstants.APPLICATION_NAME);
-        PgConnection pgConnection = new PgConnection(
-            hostSpecs,
-            connectionInfo.getPgUsername(),
-            connectionInfo.getDatabase(),
-            info,
-            connectionInfo.getJdbcUrl());
-        pgConnection.setAutoCommit(false);
-        return pgConnection;
+    private PgConnection openPgConnection() throws SQLException {
+        if (dataSource != null) {
+            Connection connection =
+                dataSource.getConnection(
+                    connectionInfo.getPgUsername(),
+                    connectionInfo.getPgPassword());
+            if (!(connection instanceof PgConnection)) {
+                throw new IllegalStateException(
+                    "Aurinko-pg only supports PostgreSQL and its class PgConnection. " +
+                        "The type of connection obtained from the DataSource was: " +
+                        connection.getClass() + ", which is not the correct type. " +
+                        "Maybe the DataSource was configured for a different database than PostgreSQL?");
+            } else {
+                this.pgConnection = (PgConnection) connection;
+                return this.pgConnection;
+            }
+        } else {
+            HostSpec hostSpec = new HostSpec(connectionInfo.getHost(), connectionInfo.getPort());
+            HostSpec[] hostSpecs = new HostSpec[]{hostSpec};
+            Properties info = new Properties();
+            info.putAll(connectionInfo.getConnectionProperties());
+            PGProperty.PASSWORD.set(info, connectionInfo.getPgPassword());
+            // TODO Add application version here
+            PGProperty.APPLICATION_NAME.set(info, GlobalConstants.APPLICATION_NAME);
+            PgConnection pgConnection = new PgConnection(
+                hostSpecs,
+                connectionInfo.getPgUsername(),
+                connectionInfo.getDatabase(),
+                info,
+                connectionInfo.getJdbcUrl());
+            pgConnection.setAutoCommit(false);
+            return this.pgConnection;
+        }
     }
 }
