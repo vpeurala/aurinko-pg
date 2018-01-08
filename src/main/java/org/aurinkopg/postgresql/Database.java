@@ -7,6 +7,7 @@ import org.postgresql.jdbc.PgConnection;
 import org.postgresql.jdbc.PgStatement;
 import org.postgresql.util.HostSpec;
 
+import javax.sql.DataSource;
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -59,6 +60,19 @@ public class Database implements AutoCloseable {
         Objects.requireNonNull(connectionInfo, "Parameter connectionInfo in Database.connect(connectionInfo) cannot be null!");
         PgConnection pgConnection = openPgConnection(connectionInfo);
         return new Database(connectionInfo, pgConnection);
+    }
+
+    public static Database connect(DataSource dataSource) throws SQLException {
+        Objects.requireNonNull(dataSource, "Parameter dataSource in Database.connect(connectionInfo) cannot be null!");
+        Connection connection = dataSource.getConnection();
+        if (!(connection instanceof PgConnection)) {
+            throw new IllegalStateException(
+                "Aurinko-pg only supports PostgreSQL and its class PgConnection. " +
+                    "The type of connection obtained from the DataSource was: " +
+                    connection.getClass() + ", which is not the correct type. " +
+                    "Maybe the DataSource was configured for a different database than PostgreSQL?");
+        }
+        return new Database(connectionInfo, (PgConnection) connection);
     }
 
     public Snapshot takeSnapshot(String snapshotName) throws SQLException {
