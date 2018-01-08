@@ -60,6 +60,7 @@ public class Database implements AutoCloseable {
     }
 
     public Snapshot takeSnapshot(String snapshotName) throws SQLException {
+        this.connection = openPgConnection(originalConnectionInfo);
         Snapshot snapshot = new Snapshot(snapshotName);
         killAllOtherConnectionsToDatabase(originalConnectionInfo.getDatabase());
         copyDatabase(originalConnectionInfo.getDatabase(), snapshot.getName());
