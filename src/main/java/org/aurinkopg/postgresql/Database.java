@@ -35,17 +35,32 @@ public class Database implements AutoCloseable {
         "AND pid <> pg_backend_pid()";
 
     private final ConnectionInfo connectionInfo;
+    private DataSource dataSource;
     private PgConnection pgConnection;
 
     /**
      * Not meant to be instantiated via constructor.
      * Use factory method {@link #connect(ConnectionInfo)}.
      *
-     * @param pgConnection a database connection.
+     * @param connectionInfo connection info.
+     * @param pgConnection   an open connection to a PostgreSQL database.
      */
     private Database(ConnectionInfo connectionInfo, PgConnection pgConnection) {
         this.connectionInfo = connectionInfo;
         this.pgConnection = pgConnection;
+    }
+
+    /**
+     * Not meant to be instantiated via constructor.
+     * Use factory method {@link #connect(ConnectionInfo, DataSource)}.
+     *
+     * @param connectionInfo connection info.
+     * @param dataSource     a DataSource which provides connections to a PostgreSQL database.
+     *                       This does not work with other databases.
+     */
+    private Database(ConnectionInfo connectionInfo, DataSource dataSource) {
+        this.connectionInfo = connectionInfo;
+        this.dataSource = dataSource;
     }
 
     /**
@@ -62,8 +77,9 @@ public class Database implements AutoCloseable {
         return new Database(connectionInfo, pgConnection);
     }
 
-    public static Database connect(DataSource dataSource) throws SQLException {
-        Objects.requireNonNull(dataSource, "Parameter dataSource in Database.connect(connectionInfo) cannot be null!");
+    public static Database connect(ConnectionInfo connectionInfo, DataSource dataSource) throws SQLException {
+        Objects.requireNonNull(connectionInfo, "Parameter connectionInfo in Database.connect(connectionInfo, dataSource) cannot be null!");
+        Objects.requireNonNull(dataSource, "Parameter dataSource in Database.connect(connectionInfo, dataSource) cannot be null!");
         Connection connection = dataSource.getConnection();
         if (!(connection instanceof PgConnection)) {
             throw new IllegalStateException(
@@ -72,7 +88,7 @@ public class Database implements AutoCloseable {
                     connection.getClass() + ", which is not the correct type. " +
                     "Maybe the DataSource was configured for a different database than PostgreSQL?");
         }
-        return new Database(connectionInfo, (PgConnection) connection);
+        return new Database(connectionInfo, dataSource);
     }
 
     public Snapshot takeSnapshot(String snapshotName) throws SQLException {
