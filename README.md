@@ -24,4 +24,5 @@ A funny coincidence is that Stellar and Aurinko are both from Helsinki, Finland.
 * Create a database for Aurinko metadata so that snapshots can be tracked.
 * Test with Java 9.
 * Upload to some public Maven repository.
+* Write some simple usage instructions.
 * Create a Continuous Integration setup (Travis?)
