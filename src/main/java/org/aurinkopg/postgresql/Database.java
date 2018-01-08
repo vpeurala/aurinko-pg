@@ -152,8 +152,10 @@ public class Database implements AutoCloseable {
         Properties info = new Properties();
         info.putAll(localConnectionInfo.getConnectionProperties());
         PGProperty.PASSWORD.set(info, localConnectionInfo.getPgPassword());
-        // TODO Add application version here
-        PGProperty.APPLICATION_NAME.set(info, GlobalConstants.APPLICATION_NAME);
+        PGProperty.APPLICATION_NAME.set(info,
+            String.format("%s-%s",
+                GlobalConstants.LIBRARY_NAME,
+                GlobalConstants.LIBRARY_VERSION));
         PgConnection pgConnection = new PgConnection(
             hostSpecs,
             localConnectionInfo.getPgUsername(),
