@@ -11,6 +11,7 @@ import org.aurinkopg.postgresql.Database;
 import org.aurinkopg.util.FinnishLocaleUtil;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -52,7 +53,6 @@ public class IntegrationTest {
     private DataSource dataSource;
     private JdbcTemplate jdbc;
     private ObjectMapper objectMapper;
-    private Snapshot snapshot;
     private DataSourceTransactionManager transactionManager;
 
     @Before
@@ -74,19 +74,32 @@ public class IntegrationTest {
     @Test
     public void takingSnapshotDoesNotChangeData() throws Exception {
         String beforeSnapshot = selectDatabaseState();
-        snapshot = database.takeSnapshot("snapshot1");
+        database.takeSnapshot("snapshot1");
         String afterSnapshot = selectDatabaseState();
         assertEquals(beforeSnapshot, afterSnapshot);
     }
 
     @Test
     public void restoringSnapshotRestoresAllDataBackToOriginal() throws Exception {
-        String beforeSnapshot = selectDatabaseState();
-        assertEquals(initialStateJson(), beforeSnapshot);
-        snapshot = database.takeSnapshot("snapshot1");
+        assertEquals(initialStateJson(), selectDatabaseState());
+        Snapshot snapshot1 = database.takeSnapshot("snapshot1");
         enlargeUrhoAndSellItToRussia();
         assertEquals(jsonResource("/state_after_enlarging_urho_and_selling_it_to_russia.json"), selectDatabaseState());
-        database.restoreSnapshot(snapshot);
+        database.restoreSnapshot(snapshot1);
+        assertEquals(initialStateJson(), selectDatabaseState());
+    }
+
+    @Test
+    @Ignore
+    public void testWithMultipleSnapshots() throws Exception {
+        assertEquals(initialStateJson(), selectDatabaseState());
+        Snapshot initialStateSnapshot = database.takeSnapshot("initial_state_snapshot");
+        System.out.println("initialStateSnapshot.getName()" + initialStateSnapshot.getName());
+        enlargeUrhoAndSellItToRussia();
+        Snapshot afterEnlargingUrhoAndSellingItToRussia = database.takeSnapshot("after_sales_snapshot");
+        database.restoreSnapshot(initialStateSnapshot);
+        assertEquals(initialStateJson(), selectDatabaseState());
+        database.restoreSnapshot(afterEnlargingUrhoAndSellingItToRussia);
         assertEquals(initialStateJson(), selectDatabaseState());
     }
 
