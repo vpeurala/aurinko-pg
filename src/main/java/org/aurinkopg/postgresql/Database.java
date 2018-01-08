@@ -18,6 +18,8 @@ import static org.postgresql.core.QueryExecutor.QUERY_NO_RESULTS;
 
 /**
  * Contains PostgreSQL database operations.
+ *
+ * TODO: select * from pg_database;
  */
 public class Database implements AutoCloseable {
     private static final String COPY_DATABASE_SQL = "CREATE DATABASE %s WITH TEMPLATE '%s' OWNER '%s'";
