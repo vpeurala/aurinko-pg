@@ -157,6 +157,6 @@ public class Database implements AutoCloseable {
             info,
             localConnectionInfo.getJdbcUrl());
         pgConnection.setAutoCommit(false);
-        return this.connection;
+        return pgConnection;
     }
 }
