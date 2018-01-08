@@ -21,3 +21,5 @@ A funny coincidence is that Stellar and Aurinko are both from Helsinki, Finland.
 * Versioning policy so that version is specified in only one place.
 * Check that the PostgreSQL user used has superuser privileges.
 * Test the Docker workflows.
+* Create a database for Aurinko metadata so that snapshots can be tracked.
+
