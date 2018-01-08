@@ -82,8 +82,11 @@ public class Database implements AutoCloseable {
         dropDatabase(snapshot.getName());
     }
 
-    public PgConnection getConnection() {
-        return connection;
+    public PgConnection getConnection() throws SQLException {
+        if (this.connection.isClosed()) {
+            this.connection = openPgConnection(originalConnectionInfo);
+        }
+        return this.connection;
     }
 
     @Override
