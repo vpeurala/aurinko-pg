@@ -34,7 +34,7 @@ public class Database implements AutoCloseable {
         "AND pid <> pg_backend_pid()";
 
     private final ConnectionInfo connectionInfo;
-    private final PgConnection pgConnection;
+    private PgConnection pgConnection;
 
     /**
      * Not meant to be instantiated via constructor.
@@ -57,20 +57,7 @@ public class Database implements AutoCloseable {
      */
     public static Database connect(ConnectionInfo connectionInfo) throws SQLException {
         Objects.requireNonNull(connectionInfo, "Parameter connectionInfo in Database.connect(connectionInfo) cannot be null!");
-        HostSpec hostSpec = new HostSpec(connectionInfo.getHost(), connectionInfo.getPort());
-        HostSpec[] hostSpecs = new HostSpec[]{hostSpec};
-        Properties info = new Properties();
-        info.putAll(connectionInfo.getConnectionProperties());
-        PGProperty.PASSWORD.set(info, connectionInfo.getPgPassword());
-        // TODO Add application version here
-        PGProperty.APPLICATION_NAME.set(info, GlobalConstants.APPLICATION_NAME);
-        PgConnection pgConnection = new PgConnection(
-            hostSpecs,
-            connectionInfo.getPgUsername(),
-            connectionInfo.getDatabase(),
-            info,
-            connectionInfo.getJdbcUrl());
-        pgConnection.setAutoCommit(false);
+        PgConnection pgConnection = openPgConnection(connectionInfo);
         return new Database(connectionInfo, pgConnection);
     }
 
@@ -85,15 +72,14 @@ public class Database implements AutoCloseable {
         // TODO: How to "drop" the current database and copy the data from the snapshot into it?
         // First, we close the current connection and open another connection into the snapshot db.
         // Store the main database name first.
-        String mainDbName = connectionInfo.getDatabase();
-        pgConnection.close();
+        ConnectionInfo originalConnectionInfo = connectionInfo;
         ConnectionInfo snapshotConnectionInfo =
             ConnectionInfo.Builder.from(connectionInfo).setDatabase(snapshot.getName()).build();
-        try (Database snapshotDb = connect(snapshotConnectionInfo)) {
-            snapshotDb.dropDatabase(mainDbName);
-            snapshotDb.killAllOtherConnectionsToDatabase(snapshot.getName());
-            snapshotDb.copyDatabase(snapshot.getName(), mainDbName);
-        }
+        this.pgConnection = openPgConnection(snapshotConnectionInfo);
+        dropDatabase(originalConnectionInfo.getDatabase());
+        killAllOtherConnectionsToDatabase(snapshot.getName());
+        copyDatabase(snapshot.getName(), originalConnectionInfo.getDatabase());
+        this.pgConnection = openPgConnection(originalConnectionInfo);
     }
 
     public void deleteSnapshot(Snapshot snapshot) throws SQLException {
@@ -152,5 +138,23 @@ public class Database implements AutoCloseable {
         );
         ResultSet resultSet = pgConnection.execSQLQuery(sql, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
         return resultSet.next();
+    }
+
+    private static PgConnection openPgConnection(ConnectionInfo connectionInfo) throws SQLException {
+        HostSpec hostSpec = new HostSpec(connectionInfo.getHost(), connectionInfo.getPort());
+        HostSpec[] hostSpecs = new HostSpec[]{hostSpec};
+        Properties info = new Properties();
+        info.putAll(connectionInfo.getConnectionProperties());
+        PGProperty.PASSWORD.set(info, connectionInfo.getPgPassword());
+        // TODO Add application version here
+        PGProperty.APPLICATION_NAME.set(info, GlobalConstants.APPLICATION_NAME);
+        PgConnection pgConnection = new PgConnection(
+            hostSpecs,
+            connectionInfo.getPgUsername(),
+            connectionInfo.getDatabase(),
+            info,
+            connectionInfo.getJdbcUrl());
+        pgConnection.setAutoCommit(false);
+        return pgConnection;
     }
 }

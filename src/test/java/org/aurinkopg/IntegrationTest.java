@@ -4,17 +4,20 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.io.IOUtils;
 import org.aurinkopg.postgresql.Database;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.SingleConnectionDataSource;
 
+import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.aurinkopg.TestFixtures.CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER;
@@ -37,14 +40,17 @@ public class IntegrationTest {
             "ORDER BY laiva_id";
 
     private Database database;
+    private DataSource dataSource;
     private JdbcTemplate jdbc;
     private ObjectMapper objectMapper;
     private Snapshot snapshot;
 
     @Before
     public void setUp() throws Exception {
+        Properties hikariProperties = new Properties();
+        dataSource = new HikariDataSource(new HikariConfig(hikariProperties));
         database = Database.connect(CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER.build());
-        jdbc = new JdbcTemplate(new SingleConnectionDataSource(database.getConnection(), false));
+        jdbc = new JdbcTemplate();
         objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
     }
 

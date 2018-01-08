@@ -13,9 +13,10 @@ repositories {
 dependencies {
   compile("org.postgresql:postgresql:42.1.4")
   testCompile("junit:junit:4.12")
-  testCompile("org.springframework:spring-jdbc:5.0.2.RELEASE")
   testCompile("com.fasterxml.jackson.core:jackson-databind:2.9.3")
+  testCompile("com.zaxxer:HikariCP:2.7.4")
   testCompile("commons-io:commons-io:2.6")
+  testCompile("org.springframework:spring-jdbc:5.0.2.RELEASE")
 }
 
 /* See https://liviutudor.com/2016/02/11/jacoco-gradle-excluding-source-files-and-classes/ */
