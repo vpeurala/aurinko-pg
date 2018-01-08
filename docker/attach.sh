@@ -4,3 +4,4 @@ pushd .;
 cd ${PROJECT_ROOT};
 docker exec --interactive --tty --user=jaanmurtaja jaanmurtaja-db /bin/bash;
 popd;
+

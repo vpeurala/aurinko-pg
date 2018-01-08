@@ -46,3 +46,4 @@ INSERT INTO laiva (nimi, valmistumisvuosi, akseliteho, vetoisuus, pituus, leveys
   ('Sovjetski Sojuz', '1990-1-1', 52, 18172, 148, 30, valtion_id('Venäjä')),
   ('Jamal', '1992-1-1', 52, 18172, 148, 30, valtion_id('Venäjä')),
   ('Let Pobedy', '2007-1-1', 52, 18172, 148, 30, valtion_id('Venäjä'));
+
