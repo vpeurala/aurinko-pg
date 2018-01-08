@@ -4,7 +4,7 @@ A snapshot tool for [PostgreSQL](https://www.postgresql.org/) and Java (or other
 
 ## Requirements
 
-* Java 8 or newer
+* Java 8 or newer (not tested on Java 9 yet)
 * PostgreSQL client library
 
 ## Influenced by Stellar
