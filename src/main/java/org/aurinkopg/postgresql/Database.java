@@ -173,6 +173,7 @@ public class Database implements AutoCloseable {
         return resultSet.next();
     }
 
+    // TODO: This method should be parameterized by the database which we want to connect to.
     private PgConnection openPgConnection() throws SQLException {
         if (dataSource != null) {
             Connection connection =
