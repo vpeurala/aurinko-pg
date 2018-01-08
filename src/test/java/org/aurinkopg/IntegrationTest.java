@@ -11,7 +11,6 @@ import org.aurinkopg.postgresql.Database;
 import org.aurinkopg.util.FinnishLocaleUtil;
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -90,21 +89,25 @@ public class IntegrationTest {
     }
 
     @Test
-    @Ignore
     public void testWithMultipleSnapshots() throws Exception {
         assertEquals(initialStateJson(), selectDatabaseState());
         Snapshot initialStateSnapshot = database.takeSnapshot("initial_state_snapshot");
-        System.out.println("initialStateSnapshot.getName()" + initialStateSnapshot.getName());
         enlargeUrhoAndSellItToRussia();
         Snapshot afterEnlargingUrhoAndSellingItToRussia = database.takeSnapshot("after_sales_snapshot");
         database.restoreSnapshot(initialStateSnapshot);
         assertEquals(initialStateJson(), selectDatabaseState());
         database.restoreSnapshot(afterEnlargingUrhoAndSellingItToRussia);
+        assertEquals(stateAfterEnlargingUrhoAndSellingItToRussia(), selectDatabaseState());
+        database.restoreSnapshot(initialStateSnapshot);
         assertEquals(initialStateJson(), selectDatabaseState());
     }
 
     private String initialStateJson() throws IOException {
         return jsonResource("/initial_state.json");
+    }
+
+    private String stateAfterEnlargingUrhoAndSellingItToRussia() throws IOException {
+        return jsonResource("/state_after_enlarging_urho_and_selling_it_to_russia.json");
     }
 
     private String jsonResource(String resourceName) throws IOException {
