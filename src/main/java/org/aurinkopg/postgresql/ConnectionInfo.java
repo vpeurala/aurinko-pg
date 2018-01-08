@@ -101,6 +101,26 @@ public class ConnectionInfo {
         private final Map<PGProperty, String> connectionProperties = new HashMap<>();
 
         /**
+         * Create a new builder from an existing ConnectionInfo.
+         *
+         * @param connectionInfo a ConnectionInfo object.
+         * @return a new Builder with parameters copied from the given ConnectionInfo.
+         */
+        public static Builder from(ConnectionInfo connectionInfo) {
+            Objects.requireNonNull(
+                connectionInfo,
+                "ConnectionInfo.Builder.from() cannot be call with a null connectionInfo!");
+            Builder builder = new Builder().
+                setHost(connectionInfo.getHost()).
+                setPort(connectionInfo.getPort()).
+                setPgUsername(connectionInfo.getPgUsername()).
+                setPgPassword(connectionInfo.getPgPassword()).
+                setDatabase(connectionInfo.getDatabase());
+            builder.connectionProperties.putAll(connectionInfo.getConnectionProperties());
+            return builder;
+        }
+
+        /**
          * Set the host. Default is "localhost". Cannot be null.
          *
          * @param host the DNS hostname or the IP address of the database server.
