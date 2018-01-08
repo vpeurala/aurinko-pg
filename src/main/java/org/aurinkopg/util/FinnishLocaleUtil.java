@@ -6,6 +6,11 @@ import java.util.Locale;
 import java.util.TimeZone;
 
 public class FinnishLocaleUtil {
+    /**
+     * Not meant to be instantiated.
+     */
+    private FinnishLocaleUtil() {}
+
     public static Locale finnishLocale() {
         return Arrays.
             stream(Locale.getAvailableLocales()).
