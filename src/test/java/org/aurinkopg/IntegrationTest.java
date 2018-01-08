@@ -6,6 +6,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.io.IOUtils;
 import org.aurinkopg.postgresql.Database;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -47,13 +48,18 @@ public class IntegrationTest {
         objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
     }
 
+    @After
+    public void tearDown() throws Exception {
+        // TODO Enable when proven to work.
+        // database.deleteSnapshot(snapshot);
+    }
+
     @Test
     public void takingSnapshotDoesNotChangeData() throws Exception {
         String beforeSnapshot = selectDatabaseState();
         snapshot = database.takeSnapshot("snapshot1");
         String afterSnapshot = selectDatabaseState();
         assertEquals(beforeSnapshot, afterSnapshot);
-        database.deleteSnapshot(snapshot);
     }
 
     @Test
@@ -65,7 +71,6 @@ public class IntegrationTest {
         assertEquals(jsonResource("/state_after_enlarging_urho_and_selling_it_to_russia.json"), selectDatabaseState());
         database.restoreSnapshot(snapshot);
         assertEquals(initialStateJson(), selectDatabaseState());
-        database.deleteSnapshot(snapshot);
     }
 
     private String initialStateJson() throws IOException {

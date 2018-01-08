@@ -18,8 +18,11 @@ import static org.postgresql.core.QueryExecutor.QUERY_NO_RESULTS;
 
 /**
  * Contains PostgreSQL database operations.
- *
- * TODO: select * from pg_database;
+ * <p>
+ * TODO Remove there psql helpers when done:
+ * LIST DATABASES: select * from pg_database;
+ * KILL ALL CONNECTIONS: SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'jaanmurtaja' AND pid <> pg_backend_pid();
+ * SELECT DATASET: SELECT laiva.id AS laiva_id, laiva.nimi AS laiva_nimi, CAST(EXTRACT(YEAR FROM laiva.valmistumisvuosi) AS INT) AS laiva_valmistumisvuosi, laiva.akseliteho AS laiva_akseliteho, laiva.vetoisuus AS laiva_vetoisuus, laiva.pituus AS laiva_pituus, laiva.leveys AS laiva_leveys ,valtio.id AS valtio_id, valtio.nimi AS valtio_nimi FROM laiva INNER JOIN valtio ON laiva.omistaja = valtio.id ORDER BY laiva_id;
  */
 public class Database implements AutoCloseable {
     private static final String COPY_DATABASE_SQL = "CREATE DATABASE %s WITH TEMPLATE '%s' OWNER '%s'";
@@ -67,15 +70,14 @@ public class Database implements AutoCloseable {
             connectionInfo.getDatabase(),
             info,
             connectionInfo.getJdbcUrl());
-        // Note: CREATE DATABASE needs to be run with autocommit on. It does not work without it.
-        pgConnection.setAutoCommit(true);
+        pgConnection.setAutoCommit(false);
         return new Database(connectionInfo, pgConnection);
     }
 
     public Snapshot takeSnapshot(String snapshotName) throws SQLException {
         Snapshot snapshot = new Snapshot(snapshotName);
         killAllOtherConnectionsToDatabase(connectionInfo.getDatabase());
-        copyDatabaseToSnapshot(snapshot.getName(), connectionInfo.getDatabase());
+        copyDatabase(connectionInfo.getDatabase(), snapshot.getName());
         return snapshot;
     }
 
@@ -89,8 +91,8 @@ public class Database implements AutoCloseable {
             ConnectionInfo.Builder.from(connectionInfo).setDatabase(snapshot.getName()).build();
         try (Database snapshotDb = connect(snapshotConnectionInfo)) {
             snapshotDb.dropDatabase(mainDbName);
-            killAllOtherConnectionsToDatabase(snapshot.getName());
-            copyDatabaseToSnapshot(snapshot.getName(), mainDbName);
+            snapshotDb.killAllOtherConnectionsToDatabase(snapshot.getName());
+            snapshotDb.copyDatabase(snapshot.getName(), mainDbName);
         }
     }
 
@@ -110,20 +112,26 @@ public class Database implements AutoCloseable {
     private void dropDatabase(String databaseName) throws SQLException {
         killAllOtherConnectionsToDatabase(databaseName);
         String sql = String.format(DROP_DATABASE_SQL, databaseName);
+        pgConnection.setAutoCommit(true);
         pgConnection.execSQLUpdate(sql);
+        pgConnection.setAutoCommit(false);
     }
 
-    private void copyDatabaseToSnapshot(String snapshotName, String database) throws SQLException {
-        if (doesDatabaseExist(snapshotName)) {
-            dropDatabase(snapshotName);
+    private void copyDatabase(String from, String to) throws SQLException {
+        if (doesDatabaseExist(to)) {
+            dropDatabase(to);
         }
-        killAllOtherConnectionsToDatabase(database);
+        pgConnection.setAutoCommit(false);
+        killAllOtherConnectionsToDatabase(from);
+        pgConnection.setAutoCommit(true);
         String sql = String.format(
             COPY_DATABASE_SQL,
-            snapshotName,
-            database,
+            to,
+            from,
             connectionInfo.getPgUsername());
         pgConnection.execSQLUpdate(sql);
+        pgConnection.setAutoCommit(false);
+        pgConnection.commit();
     }
 
     private void killAllOtherConnectionsToDatabase(String databaseName) throws SQLException {
