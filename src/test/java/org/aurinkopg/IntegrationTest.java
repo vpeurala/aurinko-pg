@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.apache.commons.io.IOUtils;
+import org.aurinkopg.postgresql.ConnectionInfo;
 import org.aurinkopg.postgresql.Database;
 import org.junit.After;
 import org.junit.Before;
@@ -17,10 +18,9 @@ import javax.sql.DataSource;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.Properties;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.aurinkopg.TestFixtures.CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER;
+import static org.aurinkopg.TestFixtures.*;
 import static org.junit.Assert.assertEquals;
 
 public class IntegrationTest {
@@ -41,16 +41,21 @@ public class IntegrationTest {
 
     private Database database;
     private DataSource dataSource;
+    private ConnectionInfo connectionInfo;
     private JdbcTemplate jdbc;
     private ObjectMapper objectMapper;
     private Snapshot snapshot;
 
     @Before
     public void setUp() throws Exception {
-        Properties hikariProperties = new Properties();
-        dataSource = new HikariDataSource(new HikariConfig(hikariProperties));
-        database = Database.connect(CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER.build());
-        jdbc = new JdbcTemplate();
+        connectionInfo = CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER.build();
+        HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setJdbcUrl(connectionInfo.getJdbcUrl());
+        hikariConfig.setUsername(POSTGRES_USERNAME);
+        hikariConfig.setPassword(POSTGRES_PASSWORD);
+        dataSource = new HikariDataSource(hikariConfig);
+        database = Database.connect(connectionInfo, dataSource);
+        jdbc = new JdbcTemplate(dataSource);
         objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
     }
 
