@@ -1,7 +1,11 @@
-version = '0.3'
-
 apply plugin: 'java'
 apply plugin: 'jacoco'
+apply plugin: 'maven'
+
+project.group = 'org.aurinko-pg'
+// archiveTask.baseName = 'aurinko'
+project.version = '0.4'
+// archiveTask.extension = 'jar'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -26,4 +30,3 @@ jacocoTestReport {
   }
 }
 test.finalizedBy(project.tasks.jacocoTestReport)
-
