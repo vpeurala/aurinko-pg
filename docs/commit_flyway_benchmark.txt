@@ -1,0 +1,46 @@
+commit e96691e81110b98c6dcfb88af335f489776d94a9
+Author: Ville Peurala <ville.peurala@gmail.com>
+Date:   Fri Dec 15 01:49:08 2017 +0200
+
+    Use Stellar instead of Flyway.
+
+    This is even slower than with Flyway:
+
+    Time spent doing database initialization in NotificationServiceEditIntegrationSpec:
+    -----------------------------------------------------------------------------------
+    Execution #1 of 'initializeDatabase' took 2535 ms.
+    Execution #2 of 'initializeDatabase' took 1884 ms.
+    Execution #3 of 'initializeDatabase' took 1896 ms.
+    Execution #4 of 'initializeDatabase' took 1967 ms.
+    Execution #5 of 'initializeDatabase' took 1944 ms.
+    Execution #6 of 'initializeDatabase' took 1865 ms.
+    Execution #7 of 'initializeDatabase' took 1924 ms.
+    Execution #8 of 'initializeDatabase' took 2023 ms.
+    Execution #9 of 'initializeDatabase' took 1791 ms.
+    Execution #10 of 'initializeDatabase' took 1859 ms.
+    Execution #11 of 'initializeDatabase' took 1824 ms.
+    Execution #12 of 'initializeDatabase' took 1893 ms.
+    Execution #13 of 'initializeDatabase' took 1928 ms.
+    Execution #14 of 'initializeDatabase' took 1864 ms.
+    Execution #15 of 'initializeDatabase' took 1879 ms.
+    Execution #16 of 'initializeDatabase' took 1946 ms.
+    Execution #17 of 'initializeDatabase' took 1851 ms.
+    Execution #18 of 'initializeDatabase' took 1879 ms.
+    Execution #19 of 'initializeDatabase' took 1996 ms.
+    Execution #20 of 'initializeDatabase' took 1842 ms.
+    TOTAL: 20 executions of 'initializeDatabase' took 38590 ms.
+
+    So this is about 3 times slower than the previous Flyway-based solution.
+
+    All hope is not lost, however. I suspect that most of the time that
+    calls to Stellar take is spent on the overhead of issuing a shell
+    command from Scala. Also:
+    - Stellar has to parse its own configuration file (stellar.yaml) every time.
+    - Stellar is written in Python, which is not a very fast language.
+    - Because Stellar drops and re-creates the whole database every time we
+    run it, we have to call `DBs.closeAll()` and `DBs.setupAll()` before
+    every test. With Flyway we had to do it only once, in `beforeAll()`.
+
+    I think that Stellar's basic idea is very promising. If we didn't
+    have to cross so many language boundaries (JVM -> Shell -> Python),
+    this could be very fast. I must think about this a little more.
