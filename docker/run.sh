@@ -17,5 +17,5 @@ if [[ "$CONTAINER_STATUS" == "jaanmurtaja-db: Up"* ]]; then
     exit 1;
   fi
 fi
-docker run --detach --hostname jaanmurtaja-db --name jaanmurtaja-db --publish 5432:5432 --user jaanmurtaja aurinko/postgresql-9.5.5:latest;
+docker run --detach --hostname jaanmurtaja-db --name jaanmurtaja-db --publish 5432:5432 --user jaanmurtaja vpeurala/aurinko-pg-9.5.5:latest;
 popd >/dev/null;
