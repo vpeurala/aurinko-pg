@@ -119,6 +119,12 @@ public class Database implements AutoCloseable {
         connection.commit();
     }
 
+    /**
+     * TODO: UPDATE pg_database SET datallowconn = 'false' WHERE datname = 'mydb';
+     * https://dba.stackexchange.com/questions/11893/force-drop-db-while-others-may-be-connected
+     * @param databaseName
+     * @throws SQLException
+     */
     private void killAllOtherConnectionsToDatabase(String databaseName) throws SQLException {
         String sql = String.format(
             KILL_ALL_OTHER_CONNECTIONS_SQL,
