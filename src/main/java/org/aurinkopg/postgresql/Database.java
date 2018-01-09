@@ -20,7 +20,7 @@ import static org.postgresql.core.QueryExecutor.QUERY_NO_RESULTS;
  */
 public class Database implements AutoCloseable {
     private static final String COPY_DATABASE_SQL = "CREATE DATABASE %s WITH TEMPLATE '%s' OWNER '%s'";
-    private static final String DOES_DATABASE_EXIST_SQL = "select 1 from pg_database where datname = '%s'";
+    private static final String DOES_DATABASE_EXIST_SQL = "SELECT 1 FROM pg_database WHERE datname = '%s'";
     private static final String DROP_DATABASE_SQL = "DROP DATABASE %s";
     private static final String KILL_ALL_OTHER_CONNECTIONS_SQL = "SELECT pg_terminate_backend(pg_stat_activity.pid) " +
         "FROM pg_stat_activity " +
