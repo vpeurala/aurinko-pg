@@ -6,3 +6,7 @@
 bazel-*
 build/
 out/
+
+# TODO Remove this when no longer needed
+deploy_local.sh
+

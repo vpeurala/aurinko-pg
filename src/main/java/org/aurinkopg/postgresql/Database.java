@@ -1,46 +1,12 @@
 package org.aurinkopg.postgresql;
 
-import org.aurinkopg.GlobalConstants;
 import org.aurinkopg.Snapshot;
-import org.postgresql.PGProperty;
 import org.postgresql.jdbc.PgConnection;
-import org.postgresql.jdbc.PgStatement;
-import org.postgresql.util.HostSpec;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.Objects;
-import java.util.Properties;
 
-import static java.sql.ResultSet.*;
-import static org.postgresql.core.QueryExecutor.QUERY_NO_RESULTS;
-
-/**
- * Contains PostgreSQL database operations.
- */
-public class Database implements AutoCloseable {
-    private static final String COPY_DATABASE_SQL = "CREATE DATABASE %s WITH TEMPLATE '%s' OWNER '%s'";
-    private static final String DOES_DATABASE_EXIST_SQL = "SELECT 1 FROM pg_database WHERE datname = '%s'";
-    private static final String DROP_DATABASE_SQL = "DROP DATABASE %s";
-    private static final String KILL_ALL_OTHER_CONNECTIONS_SQL = "SELECT pg_terminate_backend(pg_stat_activity.pid) " +
-        "FROM pg_stat_activity " +
-        "WHERE pg_stat_activity.datname = '%s' " +
-        "AND pid <> pg_backend_pid()";
-
-    private final ConnectionInfo originalConnectionInfo;
-    private PgConnection connection;
-
-    /**
-     * Not meant to be instantiated via constructor.
-     * Use factory method {@link #connect(ConnectionInfo)}.
-     *
-     * @param connectionInfo connection info.
-     */
-    private Database(ConnectionInfo connectionInfo) throws SQLException {
-        this.originalConnectionInfo = connectionInfo;
-        this.connection = openPgConnection(this.originalConnectionInfo);
-    }
-
+public interface Database {
     /**
      * Create a database connection, returning a Database object
      * on which you can execute operations.
@@ -49,122 +15,35 @@ public class Database implements AutoCloseable {
      * @return a Database object.
      * @throws SQLException if obtaining a connection fails for any reason.
      */
-    public static Database connect(ConnectionInfo connectionInfo) throws SQLException {
+    static Database connect(ConnectionInfo connectionInfo) throws SQLException {
         Objects.requireNonNull(connectionInfo, "Parameter connectionInfo in Database.connect(connectionInfo) cannot be null!");
-        return new Database(connectionInfo);
-    }
-
-    public Snapshot takeSnapshot(String snapshotName) throws SQLException {
-        this.connection = openPgConnection(originalConnectionInfo);
-        Snapshot snapshot = new Snapshot(snapshotName);
-        killAllOtherConnectionsToDatabase(originalConnectionInfo.getDatabase());
-        copyDatabase(originalConnectionInfo.getDatabase(), snapshot.getName());
-        return snapshot;
-    }
-
-    public void restoreSnapshot(Snapshot snapshot) throws Exception {
-        // First, we close the current connection and open another connection into the snapshot db.
-        // Store the main database name first.
-        ConnectionInfo originalConnectionInfo = this.originalConnectionInfo;
-        this.connection = openPgConnection(connectionInfoForSnapshot(snapshot));
-        dropDatabase(originalConnectionInfo.getDatabase());
-        killAllOtherConnectionsToDatabase(snapshot.getName());
-        copyDatabase(snapshot.getName(), originalConnectionInfo.getDatabase());
-        this.connection = openPgConnection(originalConnectionInfo);
-    }
-
-    public void deleteSnapshot(Snapshot snapshot) throws SQLException {
-        dropDatabase(snapshot.getName());
-    }
-
-    public PgConnection getConnection() throws SQLException {
-        if (this.connection.isClosed()) {
-            this.connection = openPgConnection(originalConnectionInfo);
-        }
-        return this.connection;
-    }
-
-    @Override
-    public void close() throws Exception {
-        connection.close();
-    }
-
-    private void dropDatabase(String databaseName) throws SQLException {
-        killAllOtherConnectionsToDatabase(databaseName);
-        String sql = String.format(DROP_DATABASE_SQL, databaseName);
-        connection.setAutoCommit(true);
-        connection.execSQLUpdate(sql);
-        connection.setAutoCommit(false);
-    }
-
-    private void copyDatabase(String from, String to) throws SQLException {
-        if (doesDatabaseExist(to)) {
-            dropDatabase(to);
-        }
-        connection.setAutoCommit(false);
-        killAllOtherConnectionsToDatabase(from);
-        connection.setAutoCommit(true);
-        String sql = String.format(
-            COPY_DATABASE_SQL,
-            to,
-            from,
-            originalConnectionInfo.getPgUsername());
-        connection.execSQLUpdate(sql);
-        connection.setAutoCommit(false);
-        connection.commit();
+        return new PostgreSQLDatabase(connectionInfo);
     }
 
     /**
-     * TODO: UPDATE pg_database SET datallowconn = 'false' WHERE datname = 'mydb';
-     * https://dba.stackexchange.com/questions/11893/force-drop-db-while-others-may-be-connected
+     * TODO: Write javadoc
      *
-     * @param databaseName
+     * @param snapshotName
+     * @return
      * @throws SQLException
      */
-    private void killAllOtherConnectionsToDatabase(String databaseName) throws SQLException {
-        String sql = String.format(
-            KILL_ALL_OTHER_CONNECTIONS_SQL,
-            databaseName);
-        PgStatement pgStatement = (PgStatement) connection.createStatement(
-            TYPE_FORWARD_ONLY,
-            CONCUR_READ_ONLY,
-            CLOSE_CURSORS_AT_COMMIT);
-        pgStatement.executeWithFlags(sql, QUERY_NO_RESULTS);
-    }
+    Snapshot takeSnapshot(String snapshotName) throws SQLException;
 
-    private boolean doesDatabaseExist(String databaseName) throws SQLException {
-        String sql = String.format(
-            DOES_DATABASE_EXIST_SQL,
-            databaseName
-        );
-        ResultSet resultSet = connection.execSQLQuery(sql, TYPE_FORWARD_ONLY, CONCUR_READ_ONLY);
-        return resultSet.next();
-    }
+    /**
+     * TODO: Write javadoc
+     *
+     * @param snapshot
+     * @throws Exception
+     */
+    void restoreSnapshot(Snapshot snapshot) throws Exception;
 
-    private ConnectionInfo connectionInfoForSnapshot(Snapshot snapshot) {
-        return ConnectionInfo.Builder.
-            from(originalConnectionInfo).
-            setDatabase(snapshot.getName()).
-            build();
-    }
+    /**
+     * TODO: Write javadoc
+     *
+     * @param snapshot
+     * @throws SQLException
+     */
+    void deleteSnapshot(Snapshot snapshot) throws SQLException;
 
-    private PgConnection openPgConnection(ConnectionInfo localConnectionInfo) throws SQLException {
-        HostSpec hostSpec = new HostSpec(localConnectionInfo.getHost(), localConnectionInfo.getPort());
-        HostSpec[] hostSpecs = new HostSpec[]{hostSpec};
-        Properties info = new Properties();
-        info.putAll(localConnectionInfo.getConnectionProperties());
-        PGProperty.PASSWORD.set(info, localConnectionInfo.getPgPassword());
-        PGProperty.APPLICATION_NAME.set(info,
-            String.format("%s-%s",
-                GlobalConstants.LIBRARY_NAME,
-                GlobalConstants.LIBRARY_VERSION));
-        PgConnection pgConnection = new PgConnection(
-            hostSpecs,
-            localConnectionInfo.getPgUsername(),
-            localConnectionInfo.getDatabase(),
-            info,
-            localConnectionInfo.getJdbcUrl());
-        pgConnection.setAutoCommit(false);
-        return pgConnection;
-    }
+    PgConnection getConnection() throws SQLException;
 }
