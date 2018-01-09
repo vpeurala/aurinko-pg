@@ -9,7 +9,6 @@ import org.aurinkopg.datasourceadapter.DataSourceAdapter;
 import org.aurinkopg.postgresql.ConnectionInfo;
 import org.aurinkopg.postgresql.PostgreSQLDatabase;
 import org.aurinkopg.util.FinnishLocaleUtil;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -64,12 +63,6 @@ public class IntegrationTest {
         objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
     }
 
-    @After
-    public void tearDown() throws Exception {
-        // TODO Enable when proven to work.
-        // database.deleteSnapshot(snapshot);
-    }
-
     @Test
     public void takingSnapshotDoesNotChangeData() throws Exception {
         String beforeSnapshot = selectDatabaseState();
@@ -117,7 +110,6 @@ public class IntegrationTest {
     }
 
     private String selectDatabaseState() throws JsonProcessingException, SQLException {
-        database.getConnection();
         List<Map<String, Object>> queryResult = jdbc.queryForList(TEST_SELECT);
         return objectMapper.writeValueAsString(queryResult);
     }
