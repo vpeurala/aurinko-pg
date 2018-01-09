@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 PROJECT_ROOT=$(git rev-parse --show-toplevel);
-pushd .;
-cd ${PROJECT_ROOT};
+pushd . >/dev/null;
+cd ${PROJECT_ROOT}/docker;
 docker exec --interactive --tty --user=jaanmurtaja jaanmurtaja-db /bin/bash;
-popd;
-
+popd >/dev/null;

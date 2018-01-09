@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 PROJECT_ROOT=$(git rev-parse --show-toplevel);
 pushd . >/dev/null;
-cd ${PROJECT_ROOT};
-CONTAINER_STATUS=$(./docker/checks/check_container_status.sh);
+cd ${PROJECT_ROOT}/docker;
+CONTAINER_STATUS=$(./checks/check_container_status.sh);
 echo "Container status: $CONTAINER_STATUS";
 if [[ "$CONTAINER_STATUS" == "jaanmurtaja-db: Up"* ]]; then
   echo "The container is already running.";
