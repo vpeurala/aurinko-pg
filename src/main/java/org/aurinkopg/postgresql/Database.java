@@ -17,11 +17,6 @@ import static org.postgresql.core.QueryExecutor.QUERY_NO_RESULTS;
 
 /**
  * Contains PostgreSQL database operations.
- * <p>
- * TODO Remove there psql helpers when done:
- * LIST DATABASES: select * from pg_database;
- * KILL ALL CONNECTIONS: SELECT pg_terminate_backend(pg_stat_activity.pid) FROM pg_stat_activity WHERE pg_stat_activity.datname = 'jaanmurtaja' AND pid <> pg_backend_pid();
- * SELECT DATASET: SELECT laiva.id AS laiva_id, laiva.nimi AS laiva_nimi, CAST(EXTRACT(YEAR FROM laiva.valmistumisvuosi) AS INT) AS laiva_valmistumisvuosi, laiva.akseliteho AS laiva_akseliteho, laiva.vetoisuus AS laiva_vetoisuus, laiva.pituus AS laiva_pituus, laiva.leveys AS laiva_leveys ,valtio.id AS valtio_id, valtio.nimi AS valtio_nimi FROM laiva INNER JOIN valtio ON laiva.omistaja = valtio.id ORDER BY laiva_id;
  */
 public class Database implements AutoCloseable {
     private static final String COPY_DATABASE_SQL = "CREATE DATABASE %s WITH TEMPLATE '%s' OWNER '%s'";
@@ -122,6 +117,7 @@ public class Database implements AutoCloseable {
     /**
      * TODO: UPDATE pg_database SET datallowconn = 'false' WHERE datname = 'mydb';
      * https://dba.stackexchange.com/questions/11893/force-drop-db-while-others-may-be-connected
+     *
      * @param databaseName
      * @throws SQLException
      */
