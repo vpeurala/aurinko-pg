@@ -1,6 +1,6 @@
 package org.aurinkopg.datasourceadapter;
 
-import org.aurinkopg.postgresql.Database;
+import org.aurinkopg.postgresql.PostgreSQLDatabase;
 
 import javax.sql.DataSource;
 import java.io.PrintWriter;
@@ -10,11 +10,11 @@ import java.sql.SQLFeatureNotSupportedException;
 import java.util.logging.Logger;
 
 public class DataSourceAdapter implements DataSource {
-    private final Database database;
+    private final PostgreSQLDatabase database;
     private PrintWriter logWriter;
     private int loginTimeout;
 
-    public DataSourceAdapter(Database database) {
+    public DataSourceAdapter(PostgreSQLDatabase database) {
         this.database = database;
         this.logWriter = new PrintWriter(System.out);
     }

@@ -7,7 +7,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.io.IOUtils;
 import org.aurinkopg.datasourceadapter.DataSourceAdapter;
 import org.aurinkopg.postgresql.ConnectionInfo;
-import org.aurinkopg.postgresql.Database;
+import org.aurinkopg.postgresql.PostgreSQLDatabase;
 import org.aurinkopg.util.FinnishLocaleUtil;
 import org.junit.After;
 import org.junit.Before;
@@ -48,7 +48,7 @@ public class IntegrationTest {
             "ORDER BY laiva_id";
 
     private ConnectionInfo connectionInfo;
-    private Database database;
+    private PostgreSQLDatabase database;
     private DataSource dataSource;
     private JdbcTemplate jdbc;
     private ObjectMapper objectMapper;
@@ -57,7 +57,7 @@ public class IntegrationTest {
     @Before
     public void setUp() throws Exception {
         connectionInfo = CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER.build();
-        database = Database.connect(connectionInfo);
+        database = PostgreSQLDatabase.connect(connectionInfo);
         dataSource = new DataSourceAdapter(database);
         transactionManager = new DataSourceTransactionManager(dataSource);
         jdbc = new JdbcTemplate(this.dataSource);

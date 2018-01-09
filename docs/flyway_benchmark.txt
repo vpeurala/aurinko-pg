@@ -1,0 +1,23 @@
+Time spent doing database initialization in NotificationServiceEditIntegrationSpec:
+-----------------------------------------------------------------------------------
+Execution #1 of 'initializeDatabase' took 808 ms.
+Execution #2 of 'initializeDatabase' took 753 ms.
+Execution #3 of 'initializeDatabase' took 683 ms.
+Execution #4 of 'initializeDatabase' took 727 ms.
+Execution #5 of 'initializeDatabase' took 693 ms.
+Execution #6 of 'initializeDatabase' took 783 ms.
+Execution #7 of 'initializeDatabase' took 627 ms.
+Execution #8 of 'initializeDatabase' took 637 ms.
+Execution #9 of 'initializeDatabase' took 665 ms.
+Execution #10 of 'initializeDatabase' took 635 ms.
+Execution #11 of 'initializeDatabase' took 650 ms.
+Execution #12 of 'initializeDatabase' took 704 ms.
+Execution #13 of 'initializeDatabase' took 670 ms.
+Execution #14 of 'initializeDatabase' took 654 ms.
+Execution #15 of 'initializeDatabase' took 617 ms.
+Execution #16 of 'initializeDatabase' took 594 ms.
+Execution #17 of 'initializeDatabase' took 637 ms.
+Execution #18 of 'initializeDatabase' took 647 ms.
+Execution #19 of 'initializeDatabase' took 623 ms.
+Execution #20 of 'initializeDatabase' took 621 ms.
+TOTAL: 20 executions of 'initializeDatabase' took 13428 ms.
