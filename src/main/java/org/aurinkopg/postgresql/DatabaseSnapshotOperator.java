@@ -6,7 +6,7 @@ import org.postgresql.jdbc.PgConnection;
 import java.sql.SQLException;
 import java.util.Objects;
 
-public interface PostgreSQLDatabase {
+public interface DatabaseSnapshotOperator {
     /**
      * Create a database connection, returning a Database object
      * on which you can execute operations.
@@ -15,7 +15,7 @@ public interface PostgreSQLDatabase {
      * @return a Database object.
      * @throws SQLException if obtaining a connection fails for any reason.
      */
-    static PostgreSQLDatabase connect(ConnectionInfo connectionInfo) throws SQLException {
+    static DatabaseSnapshotOperator connect(ConnectionInfo connectionInfo) throws SQLException {
         Objects.requireNonNull(connectionInfo, "Parameter connectionInfo in Database.connect(connectionInfo) cannot be null!");
         return new PostgreSQLDatabaseSnapshotOperator(connectionInfo);
     }

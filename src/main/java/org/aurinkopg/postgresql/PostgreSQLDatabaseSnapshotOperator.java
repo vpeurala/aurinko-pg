@@ -17,7 +17,7 @@ import static org.postgresql.core.QueryExecutor.QUERY_NO_RESULTS;
 /**
  * Contains PostgreSQL database operations.
  */
-class PostgreSQLDatabaseSnapshotOperator implements PostgreSQLDatabase {
+class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
     private static final String ALLOW_NEW_CONNECTIONS_FOR_DATABASE_SQL = "UPDATE pg_database " +
         "SET datallowconn = 'true' " +
         "WHERE datname = '%s'";
