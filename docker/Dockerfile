@@ -9,6 +9,7 @@ ENV TERM=linux
 RUN apt-get update && apt-get install -y \
   apt-utils \
   jq \
+  less \
   locales \
   sudo \
   vim;
@@ -36,6 +37,8 @@ RUN sed -i '21ijaanmurtaja	ALL=(ALL:ALL) ALL' /etc/sudoers;
 USER jaanmurtaja
 
 ENV PGDATA=/home/jaanmurtaja/postgresql/data
+ENV PAGER=less
+ENV LESS='-iMSx4 -RSFX -e'
 
 RUN rm -rf ${PGDATA}
 RUN mkdir -p ${PGDATA}
