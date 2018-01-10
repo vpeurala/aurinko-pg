@@ -1,4 +1,4 @@
-package org.aurinkopg.locale;
+package org.aurinkopg.testingtools;
 
 import org.apache.commons.io.IOUtils;
 

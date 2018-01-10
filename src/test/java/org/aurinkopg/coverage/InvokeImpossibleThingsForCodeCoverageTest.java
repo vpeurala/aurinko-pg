@@ -1,6 +1,8 @@
-package org.aurinkopg.locale;
+package org.aurinkopg.coverage;
 
 import org.aurinkopg.GlobalConstants;
+import org.aurinkopg.locale.FinnishLocaleUtil;
+import org.aurinkopg.locale.MissingFinnishLocaleException;
 import org.junit.Test;
 
 import java.lang.reflect.Constructor;
