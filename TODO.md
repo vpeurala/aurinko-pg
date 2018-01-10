@@ -10,3 +10,4 @@
 1. Test with Java 9.
 1. Write some simple usage instructions.
 1. Create a Continuous Integration setup (Travis?)
+1. Move the database password setting of db user jaanmurtaja to the Dockerfile instead of init.sql.
