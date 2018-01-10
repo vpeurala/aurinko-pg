@@ -56,8 +56,10 @@ class PostgreSQLDatabaseSnapshotOperator implements PostgreSQLDatabase {
     public Snapshot takeSnapshot(String snapshotName) throws SQLException {
         PgConnection connection = openPgConnection(originalConnectionInfo);
         Snapshot snapshot = new Snapshot(snapshotName);
+        blockNewConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
         killOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
         copyDatabase(originalConnectionInfo.getDatabase(), snapshot.getName(), connection);
+        allowNewConnectionsToAllDatabases(connection);
         return snapshot;
     }
 

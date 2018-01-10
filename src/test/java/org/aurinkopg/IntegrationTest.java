@@ -19,10 +19,12 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import javax.sql.DataSource;
 import java.io.IOException;
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -69,6 +71,18 @@ public class IntegrationTest {
         database.takeSnapshot("snapshot1");
         String afterSnapshot = selectDatabaseState();
         assertEquals(beforeSnapshot, afterSnapshot);
+    }
+
+    @Test
+    public void takingSnapshotTerminatesOtherConnectionsToTheDatabase() throws Exception {
+        List<Connection> oldConnections = new ArrayList<>(10);
+        for (int i = 0; i < 10; i++) {
+            oldConnections.add(database.getConnection());
+        }
+        database.takeSnapshot("snapshot_which_kills_other_connections");
+        for (Connection c : oldConnections) {
+            System.out.println(c);
+        }
     }
 
     @Test
