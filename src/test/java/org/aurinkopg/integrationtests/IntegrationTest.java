@@ -7,9 +7,9 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.io.IOUtils;
 import org.aurinkopg.Snapshot;
 import org.aurinkopg.datasourceadapter.DataSourceAdapter;
+import org.aurinkopg.locale.FinnishLocaleUtil;
 import org.aurinkopg.postgresql.ConnectionInfo;
 import org.aurinkopg.postgresql.DatabaseSnapshotOperator;
-import org.aurinkopg.locale.FinnishLocaleUtil;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -32,24 +32,10 @@ import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.aurinkopg.fixtures.TestFixtures.CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER;
+import static org.aurinkopg.fixtures.TestFixtures.SELECT_WHOLE_DATASET_SQL;
 import static org.junit.Assert.assertEquals;
 
 public class IntegrationTest {
-    private static final String TEST_SELECT =
-        "SELECT laiva.id AS laiva_id, " +
-            "laiva.nimi AS laiva_nimi, " +
-            "CAST(EXTRACT(YEAR FROM laiva.valmistumisvuosi) AS INT) AS laiva_valmistumisvuosi, " +
-            "laiva.akseliteho AS laiva_akseliteho, " +
-            "laiva.vetoisuus AS laiva_vetoisuus, " +
-            "laiva.pituus AS laiva_pituus, " +
-            "laiva.leveys AS laiva_leveys, " +
-            "valtio.id AS valtio_id, " +
-            "valtio.nimi AS valtio_nimi " +
-            "FROM laiva " +
-            "INNER JOIN valtio " +
-            "ON laiva.omistaja = valtio.id " +
-            "ORDER BY laiva_id";
-
     private ConnectionInfo connectionInfo;
     private DatabaseSnapshotOperator database;
     private DataSource dataSource;
@@ -127,7 +113,7 @@ public class IntegrationTest {
     }
 
     private String selectDatabaseState() throws JsonProcessingException, SQLException {
-        List<Map<String, Object>> queryResult = jdbc.queryForList(TEST_SELECT);
+        List<Map<String, Object>> queryResult = jdbc.queryForList(SELECT_WHOLE_DATASET_SQL);
         return objectMapper.writeValueAsString(queryResult);
     }
 

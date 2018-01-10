@@ -35,4 +35,9 @@ public class SqlExecutorTest {
         assertEquals(2L, russia.get("id"));
         assertEquals("Venäjä", russia.get("nimi"));
     }
+
+    @Test
+    public void complexQueryMapping() throws Exception {
+        
+    }
 }
