@@ -5,6 +5,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -31,7 +32,13 @@ class SqlExecutor {
         }
     }
 
-    private static List<Map<String, Object>> resultSetToListOfMaps(ResultSet resultSet) {
-        return new ArrayList<>();
+    private static List<Map<String, Object>> resultSetToListOfMaps(ResultSet resultSet) throws SQLException {
+        List<Map<String, Object>> output = new ArrayList<>();
+        while (resultSet.next()) {
+            Map<String, Object> row = new HashMap<>();
+            // TODO: Add values to the row
+            output.add(row);
+        }
+        return output;
     }
 }
