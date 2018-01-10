@@ -163,7 +163,6 @@ public class ConnectionInfo {
          * @return the builder.
          */
         public Builder setPgPassword(String pgPassword) {
-            Objects.requireNonNull(pgPassword, "ConnectionInfo.Builder.pgPassword cannot be null!");
             this.pgPassword = pgPassword;
             return this;
         }
