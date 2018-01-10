@@ -1,15 +1,12 @@
 package org.aurinkopg.integrationtests;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import org.apache.commons.io.IOUtils;
 import org.aurinkopg.Snapshot;
 import org.aurinkopg.datasourceadapter.DataSourceAdapter;
 import org.aurinkopg.locale.FinnishLocaleUtil;
 import org.aurinkopg.postgresql.ConnectionInfo;
 import org.aurinkopg.postgresql.DatabaseSnapshotOperator;
+import org.aurinkopg.testingtools.JsonResourceUser;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -30,17 +27,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static java.nio.charset.StandardCharsets.UTF_8;
 import static org.aurinkopg.fixtures.TestFixtures.CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER;
 import static org.aurinkopg.fixtures.TestFixtures.SELECT_WHOLE_DATASET_SQL;
 import static org.junit.Assert.assertEquals;
 
-public class IntegrationTest {
+public class IntegrationTest implements JsonResourceUser {
     private ConnectionInfo connectionInfo;
     private DatabaseSnapshotOperator database;
     private DataSource dataSource;
     private JdbcTemplate jdbc;
-    private ObjectMapper objectMapper;
     private DataSourceTransactionManager transactionManager;
 
     @Before
@@ -50,7 +45,6 @@ public class IntegrationTest {
         dataSource = new DataSourceAdapter(database);
         transactionManager = new DataSourceTransactionManager(dataSource);
         jdbc = new JdbcTemplate(this.dataSource);
-        objectMapper = new ObjectMapper().enable(SerializationFeature.INDENT_OUTPUT);
     }
 
     @Test
@@ -106,15 +100,9 @@ public class IntegrationTest {
         return jsonResource("/state_after_enlarging_urho_and_selling_it_to_russia.json");
     }
 
-    private String jsonResource(String resourceName) throws IOException {
-        String resource = IOUtils.resourceToString(resourceName, UTF_8);
-        JsonNode jsonNode = objectMapper.readTree(resource);
-        return objectMapper.writeValueAsString(jsonNode);
-    }
-
     private String selectDatabaseState() throws JsonProcessingException, SQLException {
         List<Map<String, Object>> queryResult = jdbc.queryForList(SELECT_WHOLE_DATASET_SQL);
-        return objectMapper.writeValueAsString(queryResult);
+        return objectMapper().writeValueAsString(queryResult);
     }
 
     private TransactionDefinition createTransactionDefinition() {
