@@ -8,7 +8,6 @@ import org.aurinkopg.postgresql.ConnectionInfo;
 import org.aurinkopg.postgresql.DatabaseSnapshotOperator;
 import org.aurinkopg.testingtools.JsonResourceUser;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
@@ -18,12 +17,10 @@ import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import javax.sql.DataSource;
 import java.io.IOException;
-import java.sql.Connection;
 import java.sql.SQLException;
 import java.time.Instant;
 import java.time.format.DateTimeFormatter;
 import java.time.format.FormatStyle;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -41,7 +38,7 @@ public class IntegrationTest implements JsonResourceUser {
     @Before
     public void setUp() throws Exception {
         connectionInfo = CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER.build();
-        database = DatabaseSnapshotOperator.connect(connectionInfo);
+        database = DatabaseSnapshotOperator.create(connectionInfo);
         dataSource = new DataSourceAdapter(database);
         transactionManager = new DataSourceTransactionManager(dataSource);
         jdbc = new JdbcTemplate(this.dataSource);
@@ -56,16 +53,14 @@ public class IntegrationTest implements JsonResourceUser {
     }
 
     @Test
-    @Ignore // TODO ENABLE TEST
     public void takingSnapshotTerminatesOtherConnectionsToTheDatabase() throws Exception {
-        List<Connection> oldConnections = new ArrayList<>(10);
+        // Create 10 connections; these will get killed when the snapshot is taken.
         for (int i = 0; i < 10; i++) {
-            oldConnections.add(database.getConnection());
+            database.openConnection();
         }
         database.takeSnapshot("snapshot_which_kills_other_connections");
-        for (Connection c : oldConnections) {
-            System.out.println(c);
-        }
+        // Ensure that we can still open a new connection after the snapshot is taken.
+        database.openConnection();
     }
 
     @Test

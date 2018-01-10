@@ -21,12 +21,12 @@ public class DataSourceAdapter implements DataSource {
 
     @Override
     public Connection getConnection() throws SQLException {
-        return database.getConnection();
+        return database.openConnection();
     }
 
     @Override
     public Connection getConnection(String username, String password) throws SQLException {
-        return database.getConnection();
+        return database.openConnection();
     }
 
     @Override

@@ -15,7 +15,7 @@ public interface DatabaseSnapshotOperator {
      * @return a Database object.
      * @throws SQLException if obtaining a connection fails for any reason.
      */
-    static DatabaseSnapshotOperator connect(ConnectionInfo connectionInfo) throws SQLException {
+    static DatabaseSnapshotOperator create(ConnectionInfo connectionInfo) throws SQLException {
         Objects.requireNonNull(connectionInfo, "Parameter connectionInfo in Database.connect(connectionInfo) cannot be null!");
         return new PostgreSQLDatabaseSnapshotOperator(connectionInfo);
     }
@@ -45,5 +45,5 @@ public interface DatabaseSnapshotOperator {
      */
     void deleteSnapshot(Snapshot snapshot) throws SQLException;
 
-    Connection getConnection() throws SQLException;
+    Connection openConnection() throws SQLException;
 }

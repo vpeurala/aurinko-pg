@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import static java.sql.ResultSet.*;
-import static org.aurinkopg.postgresql.ConnectionFactory.openConnection;
 import static org.aurinkopg.postgresql.SqlExecutor.executeSqlQuery;
 import static org.aurinkopg.postgresql.SqlExecutor.executeSqlUpdate;
 import static org.postgresql.core.QueryExecutor.QUERY_NO_RESULTS;
@@ -49,13 +48,13 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
     PostgreSQLDatabaseSnapshotOperator(ConnectionInfo connectionInfo) throws SQLException {
         this.originalConnectionInfo = connectionInfo;
         // Check that the connection works.
-        Connection testConnection = openConnection(this.originalConnectionInfo);
+        Connection testConnection = ConnectionFactory.openConnection(this.originalConnectionInfo);
         testConnection.close();
     }
 
     @Override
     public Snapshot takeSnapshot(String snapshotName) throws SQLException {
-        Connection connection = openConnection(originalConnectionInfo);
+        Connection connection = ConnectionFactory.openConnection(originalConnectionInfo);
         Snapshot snapshot = new Snapshot(snapshotName);
         blockNewConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
         killOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
@@ -66,29 +65,29 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
 
     @Override
     public void restoreSnapshot(Snapshot snapshot) throws Exception {
-        Connection mainDbConnection = openConnection(originalConnectionInfo);
+        Connection mainDbConnection = ConnectionFactory.openConnection(originalConnectionInfo);
         blockNewConnectionsToDatabase(originalConnectionInfo.getDatabase(), mainDbConnection);
         killOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), mainDbConnection);
         mainDbConnection.close();
-        Connection snapshotDbConnection = openConnection(connectionInfoForSnapshot(snapshot));
+        Connection snapshotDbConnection = ConnectionFactory.openConnection(connectionInfoForSnapshot(snapshot));
         dropDatabase(originalConnectionInfo.getDatabase(), snapshotDbConnection);
         blockNewConnectionsToDatabase(snapshot.getName(), snapshotDbConnection);
         killOtherConnectionsToDatabase(snapshot.getName(), snapshotDbConnection);
         copyDatabase(snapshot.getName(), originalConnectionInfo.getDatabase(), snapshotDbConnection);
         allowNewConnectionsToDatabase(originalConnectionInfo.getDatabase(), snapshotDbConnection);
         snapshotDbConnection.close();
-        mainDbConnection = openConnection(originalConnectionInfo);
+        mainDbConnection = ConnectionFactory.openConnection(originalConnectionInfo);
         allowNewConnectionsToAllDatabases(mainDbConnection);
     }
 
     @Override
     public void deleteSnapshot(Snapshot snapshot) throws SQLException {
-        dropDatabase(snapshot.getName(), openConnection(originalConnectionInfo));
-        allowNewConnectionsToAllDatabases(openConnection(originalConnectionInfo));
+        dropDatabase(snapshot.getName(), ConnectionFactory.openConnection(originalConnectionInfo));
+        allowNewConnectionsToAllDatabases(ConnectionFactory.openConnection(originalConnectionInfo));
     }
 
-    public Connection getConnection() throws SQLException {
-        return openConnection(originalConnectionInfo);
+    public Connection openConnection() throws SQLException {
+        return ConnectionFactory.openConnection(originalConnectionInfo);
     }
 
     private void dropDatabase(String databaseName, Connection connection) throws SQLException {
