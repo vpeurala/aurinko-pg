@@ -1,9 +1,6 @@
 package org.aurinkopg.postgresql;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,10 +30,14 @@ class SqlExecutor {
     }
 
     private static List<Map<String, Object>> resultSetToListOfMaps(ResultSet resultSet) throws SQLException {
+        ResultSetMetaData metaData = resultSet.getMetaData();
+        int columnCount = metaData.getColumnCount();
         List<Map<String, Object>> output = new ArrayList<>();
         while (resultSet.next()) {
             Map<String, Object> row = new HashMap<>();
-            // TODO: Add values to the row
+            for (int i = 1; i <= columnCount; i++) {
+                row.put(metaData.getColumnLabel(i), resultSet.getObject(i));
+            }
             output.add(row);
         }
         return output;
