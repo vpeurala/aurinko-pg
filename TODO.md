@@ -11,3 +11,4 @@
 1. Write some simple usage instructions.
 1. Create a Continuous Integration setup (Travis?)
 1. Move the database password setting of db user jaanmurtaja to the Dockerfile instead of init.sql.
+1. Set the "template" attribute on for snapshots, so that they cannot be accidentally used as ordinary databases.
