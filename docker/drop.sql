@@ -1,4 +1,4 @@
-DROP TABLE laiva;
-DROP TABLE valtio;
-DROP FUNCTION valtion_id(IN in_nimi TEXT);
+DROP TABLE IF EXISTS laiva;
+DROP TABLE IF EXISTS valtio;
+DROP FUNCTION IF EXISTS valtion_id(IN in_nimi TEXT);
 
