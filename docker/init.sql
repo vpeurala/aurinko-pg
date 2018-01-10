@@ -1,11 +1,11 @@
 ALTER ROLE jaanmurtaja WITH PASSWORD 'argxBX4DxWJKC7st';
 
-CREATE TABLE valtio (
+CREATE TABLE IF NOT EXISTS valtio (
   id BIGSERIAL PRIMARY KEY,
   nimi TEXT NOT NULL
 );
 
-CREATE TABLE laiva (
+CREATE TABLE IF NOT EXISTS laiva (
   id BIGSERIAL PRIMARY KEY,
   nimi TEXT NOT NULL,
   valmistumisvuosi DATE NOT NULL,
@@ -16,7 +16,7 @@ CREATE TABLE laiva (
   omistaja BIGINT REFERENCES valtio (id) NOT NULL
 );
 
-CREATE FUNCTION valtion_id(
+CREATE OR REPLACE FUNCTION valtion_id(
   IN in_nimi TEXT)
 RETURNS BIGINT
 LANGUAGE SQL
@@ -46,3 +46,4 @@ INSERT INTO laiva (nimi, valmistumisvuosi, akseliteho, vetoisuus, pituus, leveys
   ('Sovjetski Sojuz', '1990-1-1', 52, 18172, 148, 30, valtion_id('Venäjä')),
   ('Jamal', '1992-1-1', 52, 18172, 148, 30, valtion_id('Venäjä')),
   ('Let Pobedy', '2007-1-1', 52, 18172, 148, 30, valtion_id('Venäjä'));
+
