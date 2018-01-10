@@ -1,5 +1,8 @@
 package org.aurinkopg.postgresql;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import org.aurinkopg.testingtools.JsonResourceUser;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -8,20 +11,28 @@ import java.util.List;
 import java.util.Map;
 
 import static org.aurinkopg.fixtures.TestFixtures.CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER;
+import static org.aurinkopg.fixtures.TestFixtures.SELECT_WHOLE_DATASET_SQL;
+import static org.aurinkopg.postgresql.ConnectionFactory.openConnection;
 import static org.aurinkopg.postgresql.SqlExecutor.executeSqlQuery;
 import static org.junit.Assert.assertEquals;
 
 // TODO: These tests depend on the database being in the default initial state (like it is after running ./docker/init_db.sh).
 // These tests should put the database in the required state themselves.
-public class SqlExecutorTest {
+public class SqlExecutorTest implements JsonResourceUser {
     private ConnectionInfo connectionInfo;
     private ConnectionFactory connectionFactory;
     private Connection connection;
+    private ObjectMapper objectMapper;
 
     @Before
     public void setUp() throws Exception {
         connectionInfo = CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER.build();
-        connection = ConnectionFactory.openConnection(connectionInfo);
+        connection = openConnection(connectionInfo);
+    }
+
+    @After
+    public void tearDown() throws Exception {
+        connection.close();
     }
 
     @Test
@@ -38,6 +49,7 @@ public class SqlExecutorTest {
 
     @Test
     public void complexQueryMapping() throws Exception {
-        
+        List<Map<String, Object>> result = executeSqlQuery(SELECT_WHOLE_DATASET_SQL, connection);
+        assertEquals(jsonResource("/initial_state.json"), objectMapper().writeValueAsString(result));
     }
 }
