@@ -6,8 +6,8 @@ import org.junit.Test;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.aurinkopg.TestFixtures.TEST_DOCKER_CONTAINER_NAME;
-import static org.aurinkopg.TestFixtures.TEST_DOCKER_IMAGE_NAME;
+import static org.aurinkopg.fixtures.TestFixtures.TEST_DOCKER_CONTAINER_NAME;
+import static org.aurinkopg.fixtures.TestFixtures.TEST_DOCKER_IMAGE_NAME;
 import static org.junit.Assert.assertEquals;
 
 public class DockerTest {

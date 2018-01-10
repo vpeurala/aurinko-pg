@@ -1,10 +1,11 @@
-package org.aurinkopg;
+package org.aurinkopg.integrationtests;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.apache.commons.io.IOUtils;
+import org.aurinkopg.Snapshot;
 import org.aurinkopg.datasourceadapter.DataSourceAdapter;
 import org.aurinkopg.postgresql.ConnectionInfo;
 import org.aurinkopg.postgresql.DatabaseSnapshotOperator;
@@ -30,7 +31,7 @@ import java.util.List;
 import java.util.Map;
 
 import static java.nio.charset.StandardCharsets.UTF_8;
-import static org.aurinkopg.TestFixtures.CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER;
+import static org.aurinkopg.fixtures.TestFixtures.CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER;
 import static org.junit.Assert.assertEquals;
 
 public class IntegrationTest {

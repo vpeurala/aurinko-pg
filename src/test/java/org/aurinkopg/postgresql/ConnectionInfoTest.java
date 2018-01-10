@@ -1,9 +1,8 @@
-package org.aurinkopg;
+package org.aurinkopg.postgresql;
 
-import org.aurinkopg.postgresql.ConnectionInfo;
 import org.junit.Test;
 
-import static org.aurinkopg.TestFixtures.*;
+import static org.aurinkopg.fixtures.TestFixtures.*;
 import static org.junit.Assert.assertEquals;
 
 public class ConnectionInfoTest {

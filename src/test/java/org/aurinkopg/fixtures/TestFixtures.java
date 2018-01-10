@@ -1,4 +1,4 @@
-package org.aurinkopg;
+package org.aurinkopg.fixtures;
 
 import org.aurinkopg.postgresql.ConnectionInfo;
 
