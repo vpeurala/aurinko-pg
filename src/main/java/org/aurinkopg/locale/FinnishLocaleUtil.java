@@ -1,4 +1,4 @@
-package org.aurinkopg.util;
+package org.aurinkopg.locale;
 
 import java.time.ZoneId;
 import java.util.Arrays;

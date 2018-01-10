@@ -1,4 +1,4 @@
-package org.aurinkopg.util;
+package org.aurinkopg.locale;
 
 import org.aurinkopg.GlobalConstants;
 import org.junit.Test;

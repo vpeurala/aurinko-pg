@@ -1,8 +1,8 @@
 package org.aurinkopg.postgresql;
 
 import org.aurinkopg.Snapshot;
-import org.postgresql.jdbc.PgConnection;
 
+import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Objects;
 
@@ -45,5 +45,5 @@ public interface DatabaseSnapshotOperator {
      */
     void deleteSnapshot(Snapshot snapshot) throws SQLException;
 
-    PgConnection getConnection() throws SQLException;
+    Connection getConnection() throws SQLException;
 }

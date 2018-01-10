@@ -1,4 +1,4 @@
-package org.aurinkopg.util;
+package org.aurinkopg.locale;
 
 public class MissingFinnishLocaleException extends RuntimeException {
     public MissingFinnishLocaleException() {

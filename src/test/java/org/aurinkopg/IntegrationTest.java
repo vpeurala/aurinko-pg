@@ -8,7 +8,7 @@ import org.apache.commons.io.IOUtils;
 import org.aurinkopg.datasourceadapter.DataSourceAdapter;
 import org.aurinkopg.postgresql.ConnectionInfo;
 import org.aurinkopg.postgresql.DatabaseSnapshotOperator;
-import org.aurinkopg.util.FinnishLocaleUtil;
+import org.aurinkopg.locale.FinnishLocaleUtil;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;

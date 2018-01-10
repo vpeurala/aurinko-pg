@@ -1,6 +1,6 @@
 package org.aurinkopg.docker;
 
-import org.aurinkopg.util.JavaTee;
+import org.aurinkopg.locale.JavaTee;
 
 import java.io.IOException;
 import java.io.InputStream;

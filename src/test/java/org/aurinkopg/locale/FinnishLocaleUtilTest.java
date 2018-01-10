@@ -1,4 +1,4 @@
-package org.aurinkopg.util;
+package org.aurinkopg.locale;
 
 import org.junit.Test;
 
@@ -9,8 +9,8 @@ import java.time.format.TextStyle;
 import java.util.Locale;
 import java.util.TimeZone;
 
-import static org.aurinkopg.util.FinnishLocaleUtil.finnishLocale;
-import static org.aurinkopg.util.FinnishLocaleUtil.finnishTimeZoneId;
+import static org.aurinkopg.locale.FinnishLocaleUtil.finnishLocale;
+import static org.aurinkopg.locale.FinnishLocaleUtil.finnishTimeZoneId;
 import static org.junit.Assert.*;
 
 public class FinnishLocaleUtilTest {
