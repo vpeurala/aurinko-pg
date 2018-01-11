@@ -86,6 +86,7 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
         allowNewConnectionsToAllDatabases(ConnectionFactory.openConnection(originalConnectionInfo));
     }
 
+    @Override
     public Connection openConnection() throws SQLException {
         return ConnectionFactory.openConnection(originalConnectionInfo);
     }
@@ -155,6 +156,7 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
             build();
     }
 
+    // TODO Use or delete
     private boolean doesDatabaseAllowNewConnections(String databaseName, Connection connection) throws SQLException {
         String sql = String.format(DOES_DATABASE_ALLOW_NEW_CONNECTIONS_SQL, databaseName);
         List<Map<String, Object>> result = executeSqlQuery(sql, connection);
