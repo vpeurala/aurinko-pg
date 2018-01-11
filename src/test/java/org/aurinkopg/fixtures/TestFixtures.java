@@ -26,11 +26,12 @@ public class TestFixtures {
             "ON laiva.omistaja = valtio.id " +
             "ORDER BY laiva_id";
 
-    public static final ConnectionInfo.Builder CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER =
-        new ConnectionInfo.Builder()
+    public static final ConnectionInfo.Builder connectionInfoBuilderWhichCanConnectToTestDockerContainerAsSuperuser() {
+        return new ConnectionInfo.Builder()
             .setHost(POSTGRES_HOST)
             .setPort(POSTGRES_PORT)
             .setPgUsername(POSTGRES_USERNAME)
             .setPgPassword(POSTGRES_PASSWORD)
             .setDatabase(POSTGRES_DATABASE);
+    }
 }

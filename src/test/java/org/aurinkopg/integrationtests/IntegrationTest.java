@@ -24,8 +24,8 @@ import java.time.format.FormatStyle;
 import java.util.List;
 import java.util.Map;
 
-import static org.aurinkopg.fixtures.TestFixtures.CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER;
 import static org.aurinkopg.fixtures.TestFixtures.SELECT_WHOLE_DATASET_SQL;
+import static org.aurinkopg.fixtures.TestFixtures.connectionInfoBuilderWhichCanConnectToTestDockerContainerAsSuperuser;
 import static org.junit.Assert.assertEquals;
 
 public class IntegrationTest implements JsonResourceUser {
@@ -37,7 +37,7 @@ public class IntegrationTest implements JsonResourceUser {
 
     @Before
     public void setUp() throws Exception {
-        connectionInfo = CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER.build();
+        connectionInfo = connectionInfoBuilderWhichCanConnectToTestDockerContainerAsSuperuser().build();
         database = DatabaseSnapshotOperator.create(connectionInfo);
         dataSource = new DataSourceAdapter(database);
         transactionManager = new DataSourceTransactionManager(dataSource);

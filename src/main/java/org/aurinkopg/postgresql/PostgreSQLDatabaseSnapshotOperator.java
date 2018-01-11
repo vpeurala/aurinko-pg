@@ -51,7 +51,7 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
         this.originalConnectionInfo = connectionInfo;
         // Check that the connection works and the user has superuser privileges.
         Connection testConnection = ConnectionFactory.openConnection(this.originalConnectionInfo);
-        checkSuperuser(connectionInfo.getPgUsername(), stestConnection);
+        checkSuperuser(connectionInfo.getPgUsername(), testConnection);
         testConnection.close();
     }
 

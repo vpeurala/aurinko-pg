@@ -10,8 +10,8 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.Map;
 
-import static org.aurinkopg.fixtures.TestFixtures.CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER;
 import static org.aurinkopg.fixtures.TestFixtures.SELECT_WHOLE_DATASET_SQL;
+import static org.aurinkopg.fixtures.TestFixtures.connectionInfoBuilderWhichCanConnectToTestDockerContainerAsSuperuser;
 import static org.aurinkopg.postgresql.ConnectionFactory.openConnection;
 import static org.aurinkopg.postgresql.SqlExecutor.executeSqlQuery;
 import static org.junit.Assert.assertEquals;
@@ -26,7 +26,7 @@ public class SqlExecutorTest implements JsonResourceUser {
 
     @Before
     public void setUp() throws Exception {
-        connectionInfo = CONNECTION_INFO_BUILDER_WHICH_CONNECTS_TO_TEST_DOCKER_CONTAINER.build();
+        connectionInfo = connectionInfoBuilderWhichCanConnectToTestDockerContainerAsSuperuser().build();
         connection = openConnection(connectionInfo);
     }
 

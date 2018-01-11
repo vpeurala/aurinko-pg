@@ -51,12 +51,15 @@ COPY init.sql /home/jaanmurtaja/init.sql
 RUN initdb --encoding=UTF-8 --lc-collate=fi_FI.UTF-8 --lc-ctype=fi_FI.UTF-8 --lc-messages=en_US.UTF-8 --lc-monetary=fi_FI.UTF-8 --lc-numeric=fi_FI.UTF-8 --lc-time=fi_FI.UTF-8 --locale=fi_FI.UTF-8 --pgdata=${PGDATA} --username=jaanmurtaja;
 RUN pg_ctl start -w -D ${PGDATA}; \
   createdb --encoding=UTF-8 --owner=jaanmurtaja jaanmurtaja; \
+  psql -c "ALTER ROLE jaanmurtaja WITH PASSWORD 'argxBX4DxWJKC7st'"; \
+  psql -c "CREATE ROLE tavis WITH NOSUPERUSER LOGIN ENCRYPTED PASSWORD 'Mansikka2'"; \
   psql < /home/jaanmurtaja/init.sql; \
   pg_ctl stop -w -D ${PGDATA} --mode=smart;
 
-# Modify the client authentication file (pg_hba.conf) so that user jaanmurtaja
-# can log in from outside the container.
+# Modify the client authentication file (pg_hba.conf) so that users "jaanmurtaja"
+# and "tavis" can log in from outside the container.
 RUN echo 'host	all	jaanmurtaja	0.0.0.0/0	md5' >> ${PGDATA}/pg_hba.conf;
+RUN echo 'host	all	tavis	0.0.0.0/0	md5' >> ${PGDATA}/pg_hba.conf;
 
 ENTRYPOINT postgres -D ${PGDATA} -h 0.0.0.0 -i -p 5432;
 CMD []
