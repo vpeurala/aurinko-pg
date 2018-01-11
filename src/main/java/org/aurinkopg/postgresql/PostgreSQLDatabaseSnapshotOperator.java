@@ -41,7 +41,7 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
 
     /**
      * Not meant to be instantiated via constructor.
-     * Use factory method {@link #connect(ConnectionInfo)}.
+     * Use factory method {@link DatabaseSnapshotOperator#create(ConnectionInfo)}.
      *
      * @param connectionInfo connection info.
      */
