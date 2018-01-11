@@ -7,6 +7,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static java.sql.ResultSet.*;
 import static org.aurinkopg.postgresql.SqlExecutor.executeSqlQuery;
@@ -46,14 +47,17 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
      * @param connectionInfo connection info.
      */
     PostgreSQLDatabaseSnapshotOperator(ConnectionInfo connectionInfo) throws SQLException {
+        Objects.requireNonNull(connectionInfo, "Parameter connectionInfo in Database.connect(connectionInfo) cannot be null!");
         this.originalConnectionInfo = connectionInfo;
-        // Check that the connection works.
+        // Check that the connection works and the user has superuser privileges.
         Connection testConnection = ConnectionFactory.openConnection(this.originalConnectionInfo);
+        checkSuperuser(connectionInfo.getPgUsername(), stestConnection);
         testConnection.close();
     }
 
     @Override
     public Snapshot takeSnapshot(String snapshotName) throws SQLException {
+        Objects.requireNonNull(snapshotName, "Parameter snapshotName in Database.takeSnapshot(connectionInfo) cannot be null!");
         try (Connection connection = ConnectionFactory.openConnection(originalConnectionInfo)) {
             Snapshot snapshot = new Snapshot(snapshotName);
             blockNewConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
@@ -67,6 +71,7 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
     // TODO This method is too complex and difficult to understand.
     @Override
     public void restoreSnapshot(Snapshot snapshot) throws Exception {
+        Objects.requireNonNull(snapshot, "Parameter snapshot in Database.restoreSnapshot(connectionInfo) cannot be null!");
         Connection mainDbConnection = ConnectionFactory.openConnection(originalConnectionInfo);
         blockNewConnectionsToDatabase(originalConnectionInfo.getDatabase(), mainDbConnection);
         killOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), mainDbConnection);
@@ -85,6 +90,7 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
 
     @Override
     public void deleteSnapshot(Snapshot snapshot) throws SQLException {
+        Objects.requireNonNull(snapshot, "Parameter snapshot in Database.deleteSnapshot(connectionInfo) cannot be null!");
         dropDatabase(snapshot.getName(), ConnectionFactory.openConnection(originalConnectionInfo));
         allowNewConnectionsToAllDatabases(ConnectionFactory.openConnection(originalConnectionInfo));
     }
@@ -157,6 +163,19 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
             from(originalConnectionInfo).
             setDatabase(snapshot.getName()).
             build();
+    }
+
+    private void checkSuperuser(String username, Connection connection) throws SQLException {
+        String sql = "SELECT usesuper FROM pg_catalog.pg_user WHERE usename = current_user";
+        List<Map<String, Object>> result = executeSqlQuery(sql, connection);
+        if (!((boolean) result.get(0).get("usesuper"))) {
+            throw new SQLException(
+                String.
+                    format(
+                        "User '%s' is not a superuser. " +
+                            "Using of the operations provided by this class requires superuser privileges.",
+                        username));
+        }
     }
 
     // TODO Use or delete
