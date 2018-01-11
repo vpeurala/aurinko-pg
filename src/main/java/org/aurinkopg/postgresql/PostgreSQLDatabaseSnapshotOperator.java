@@ -54,15 +54,17 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
 
     @Override
     public Snapshot takeSnapshot(String snapshotName) throws SQLException {
-        Connection connection = ConnectionFactory.openConnection(originalConnectionInfo);
-        Snapshot snapshot = new Snapshot(snapshotName);
-        blockNewConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
-        killOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
-        copyDatabase(originalConnectionInfo.getDatabase(), snapshot.getName(), connection);
-        allowNewConnectionsToAllDatabases(connection);
-        return snapshot;
+        try (Connection connection = ConnectionFactory.openConnection(originalConnectionInfo)) {
+            Snapshot snapshot = new Snapshot(snapshotName);
+            blockNewConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
+            killOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
+            copyDatabase(originalConnectionInfo.getDatabase(), snapshot.getName(), connection);
+            allowNewConnectionsToAllDatabases(connection);
+            return snapshot;
+        }
     }
 
+    // TODO This method is too complex and difficult to understand.
     @Override
     public void restoreSnapshot(Snapshot snapshot) throws Exception {
         Connection mainDbConnection = ConnectionFactory.openConnection(originalConnectionInfo);
@@ -78,6 +80,7 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
         snapshotDbConnection.close();
         mainDbConnection = ConnectionFactory.openConnection(originalConnectionInfo);
         allowNewConnectionsToAllDatabases(mainDbConnection);
+        mainDbConnection.close();
     }
 
     @Override
