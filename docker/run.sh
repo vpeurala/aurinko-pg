@@ -4,8 +4,8 @@ pushd . >/dev/null;
 cd ${PROJECT_ROOT}/docker;
 CONTAINER_STATUS=$(./checks/check_container_status.sh);
 echo "Container status: $CONTAINER_STATUS";
-if [[ "$CONTAINER_STATUS" == "jaanmurtaja-db: Up"* ]]; then
-  echo "The container is already running.";
+if [[ "$CONTAINER_STATUS" == "jaanmurtaja-db"* ]]; then
+  echo "The container already exists.";
   if [[ "$1" == "-f" || "$1" == "--force" ]]; then
     echo "You used the \"force\" option \"$1\", so we destroy the current container and start a new one.";
     docker rm -f jaanmurtaja-db;
