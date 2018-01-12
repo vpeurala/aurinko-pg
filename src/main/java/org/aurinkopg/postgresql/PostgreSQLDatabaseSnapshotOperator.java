@@ -62,6 +62,7 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
         try (Connection connection = ConnectionFactory.openConnection(originalConnectionInfo)) {
             Snapshot snapshot = new Snapshot(snapshotName);
             blockNewConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
+            cancelOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
             terminateOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
             copyDatabase(originalConnectionInfo.getDatabase(), snapshot.getName(), connection);
             allowNewConnectionsToAllDatabases(connection);
@@ -75,11 +76,13 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
         Objects.requireNonNull(snapshot, "Parameter snapshot in Database.restoreSnapshot(connectionInfo) cannot be null!");
         Connection mainDbConnection = ConnectionFactory.openConnection(originalConnectionInfo);
         blockNewConnectionsToDatabase(originalConnectionInfo.getDatabase(), mainDbConnection);
+        cancelOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), mainDbConnection);
         terminateOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), mainDbConnection);
         mainDbConnection.close();
         Connection snapshotDbConnection = ConnectionFactory.openConnection(connectionInfoForSnapshot(snapshot));
         dropDatabase(originalConnectionInfo.getDatabase(), snapshotDbConnection);
         blockNewConnectionsToDatabase(snapshot.getName(), snapshotDbConnection);
+        cancelOtherConnectionsToDatabase(snapshot.getName(), snapshotDbConnection);
         terminateOtherConnectionsToDatabase(snapshot.getName(), snapshotDbConnection);
         copyDatabase(snapshot.getName(), originalConnectionInfo.getDatabase(), snapshotDbConnection);
         allowNewConnectionsToDatabase(originalConnectionInfo.getDatabase(), snapshotDbConnection);
@@ -103,6 +106,7 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
 
     private void dropDatabase(String databaseName, Connection connection) throws SQLException {
         blockNewConnectionsToDatabase(databaseName, connection);
+        cancelOtherConnectionsToDatabase(databaseName, connection);
         terminateOtherConnectionsToDatabase(databaseName, connection);
         String sql = String.format(DROP_DATABASE_SQL, databaseName);
         executeSqlUpdate(sql, connection);
@@ -114,6 +118,7 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
             dropDatabase(to, connection);
         }
         blockNewConnectionsToDatabase(from, connection);
+        cancelOtherConnectionsToDatabase(from, connection);
         terminateOtherConnectionsToDatabase(from, connection);
         String sql = String.format(
             COPY_DATABASE_SQL,
