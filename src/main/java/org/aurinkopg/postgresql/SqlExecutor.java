@@ -1,5 +1,7 @@
 package org.aurinkopg.postgresql;
 
+import org.postgresql.jdbc.PgStatement;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -7,15 +9,16 @@ import java.util.List;
 import java.util.Map;
 
 import static java.sql.ResultSet.*;
+import static org.postgresql.core.QueryExecutor.QUERY_NO_RESULTS;
 
 class SqlExecutor {
-    static int executeSqlUpdate(String sql, Connection connection) throws SQLException {
-        try (Statement statement =
-                 connection.createStatement(
-                     TYPE_FORWARD_ONLY,
-                     CONCUR_READ_ONLY,
-                     CLOSE_CURSORS_AT_COMMIT)) {
-            return statement.executeUpdate(sql);
+    static void executeSqlUpdate(String sql, Connection connection) throws SQLException {
+        try (PgStatement statement = (PgStatement)
+            connection.createStatement(
+                TYPE_FORWARD_ONLY,
+                CONCUR_READ_ONLY,
+                CLOSE_CURSORS_AT_COMMIT)) {
+            statement.executeWithFlags(sql, QUERY_NO_RESULTS);
         }
     }
 
