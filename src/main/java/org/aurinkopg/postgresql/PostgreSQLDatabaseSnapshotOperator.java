@@ -34,6 +34,10 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
     private static final String COPY_DATABASE_SQL = "CREATE DATABASE %s WITH TEMPLATE '%s' OWNER '%s'";
     private static final String DOES_DATABASE_EXIST_SQL = "SELECT 1 FROM pg_database WHERE datname = '%s'";
     private static final String DROP_DATABASE_SQL = "DROP DATABASE %s";
+    private static final String SELECT_COUNT_OF_OTHER_CONNECTIONS_SQL = "SELECT COUNT(*) " +
+        "FROM pg_stat_activity " +
+        "WHERE pg_stat_activity.datname = '%s' " +
+        "AND pid <> pg_backend_pid()";
     private static final String TERMINATE_ALL_OTHER_CONNECTIONS_SQL = "SELECT pg_terminate_backend(pg_stat_activity.pid) " +
         "FROM pg_stat_activity " +
         "WHERE pg_stat_activity.datname = '%s' " +
@@ -61,9 +65,17 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
         Objects.requireNonNull(snapshotName, "Parameter snapshotName in Database.takeSnapshot(connectionInfo) cannot be null!");
         try (Connection connection = ConnectionFactory.openConnection(originalConnectionInfo)) {
             Snapshot snapshot = new Snapshot(snapshotName);
+            // TODO Remove sysout debug
+            System.out.println("Count of other connections to db before block: " + selectCountOfOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection));
             blockNewConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
+            // TODO Remove sysout debug
+            System.out.println("Count of other connections to db after block: " + selectCountOfOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection));
             cancelOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
+            // TODO Remove sysout debug
+            System.out.println("Count of other connections to db after cancel: " + selectCountOfOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection));
             terminateOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
+            // TODO Remove sysout debug
+            System.out.println("Count of other connections to db after terminate: " + selectCountOfOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection));
             copyDatabase(originalConnectionInfo.getDatabase(), snapshot.getName(), connection);
             allowNewConnectionsToAllDatabases(connection);
             return snapshot;
@@ -151,6 +163,12 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
     private void terminateOtherConnectionsToDatabase(String databaseName, Connection connection) throws SQLException {
         String sql = String.format(TERMINATE_ALL_OTHER_CONNECTIONS_SQL, databaseName);
         executeSqlUpdate(sql, connection);
+    }
+
+    private long selectCountOfOtherConnectionsToDatabase(String databaseName, Connection connection) throws SQLException {
+        String sql = String.format(SELECT_COUNT_OF_OTHER_CONNECTIONS_SQL, databaseName);
+        List<Map<String, Object>> result = executeSqlQuery(sql, connection);
+        return (long) result.get(0).get("count");
     }
 
     private boolean doesDatabaseExist(String databaseName, Connection connection) throws SQLException {
