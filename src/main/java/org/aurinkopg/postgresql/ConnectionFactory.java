@@ -33,6 +33,7 @@ class ConnectionFactory {
         // SOCKET_TIMEOUT is specified in seconds. Thus, this means 3 seconds.
         PGProperty.SOCKET_TIMEOUT.set(info, 3);
         PGProperty.TARGET_SERVER_TYPE.set(info, "master");
+        PGProperty.TCP_KEEP_ALIVE.set(info, true);
 
         Connection connection = new PgConnection(
             hostSpecs,
