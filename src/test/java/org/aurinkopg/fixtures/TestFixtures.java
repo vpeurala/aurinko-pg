@@ -4,7 +4,7 @@ import org.aurinkopg.postgresql.ConnectionInfo;
 
 public class TestFixtures {
     public static final String POSTGRES_HOST = "0.0.0.0";
-    public static final Integer POSTGRES_PORT = 5432;
+    public static final Integer POSTGRES_PORT = 6543;
     public static final String POSTGRES_USERNAME = "jaanmurtaja";
     public static final String POSTGRES_PASSWORD = "argxBX4DxWJKC7st";
     public static final String POSTGRES_DATABASE = "jaanmurtaja";
