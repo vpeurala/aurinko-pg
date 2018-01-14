@@ -20,6 +20,7 @@ dependencies {
   testCompile("com.fasterxml.jackson.core:jackson-databind:2.9.3")
   testCompile("com.zaxxer:HikariCP:2.7.4")
   testCompile("commons-io:commons-io:2.6")
+  testCompile("org.apache.commons:commons-dbcp2:2.2.0'")
   testCompile("org.springframework:spring-jdbc:5.0.2.RELEASE")
 }
 
