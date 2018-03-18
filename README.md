@@ -6,6 +6,11 @@ A snapshot tool for [PostgreSQL](https://www.postgresql.org/) and Java (or other
 
 * Java 8 or newer (not tested on Java 9 yet)
 * PostgreSQL client library
+* Docker
+
+## Building
+
+`./gradlew test`
 
 ## Influenced by Stellar
 
