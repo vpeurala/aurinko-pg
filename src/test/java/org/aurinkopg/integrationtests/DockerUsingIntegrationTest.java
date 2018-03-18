@@ -4,6 +4,7 @@ import com.github.dockerjava.api.DockerClient;
 import com.github.dockerjava.api.command.CreateContainerResponse;
 import com.github.dockerjava.api.command.DockerCmdExecFactory;
 import com.github.dockerjava.api.model.BuildResponseItem;
+import com.github.dockerjava.api.model.Container;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.PortBinding;
 import com.github.dockerjava.api.model.Ports.Binding;
@@ -18,6 +19,7 @@ import org.junit.BeforeClass;
 import java.io.File;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 
 public abstract class DockerUsingIntegrationTest {
     public static final String IMAGE_NAME = "vpeurala/aurinko-pg-9.5.5:latest";
@@ -39,8 +41,46 @@ public abstract class DockerUsingIntegrationTest {
         dockerClient = DockerClientBuilder.getInstance(dockerConfig)
             .withDockerCmdExecFactory(dockerCmdExecFactory)
             .build();
-        // Equivalent shell command:
-        // docker build --file Dockerfile --tag vpeurala/aurinko-pg-9.5.5:latest .;
+        buildImage();
+        try {
+            createContainer();
+        } catch (Throwable t) {
+            System.out.printf("Caught throwable in createContainer: %s\n", t);
+            t.printStackTrace();
+            try {
+                stopContainer();
+                removeContainer();
+                createContainer();
+            } catch (Throwable t2) {
+                System.out.printf("Caught throwable in createContainer retry: %s\n", t2);
+                t2.printStackTrace();
+                throw t2;
+            }
+        }
+        dockerClient.startContainerCmd(containerId).exec();
+        System.out.printf("Docker container started with id %s\n", containerId);
+    }
+
+    @AfterClass
+    public static void dockerTearDown() throws Exception {
+        try {
+            System.out.printf("Going to stop Docker container with id %s\n", containerId);
+            stopContainer();
+            removeContainer();
+        } catch (Throwable t) {
+            System.out.printf("Caught throwable in dockerTearDown: %s\n", t);
+            t.printStackTrace();
+            throw t;
+        } finally {
+            removeContainer();
+        }
+    }
+
+    /**
+     * Equivalent shell command:
+     * docker build --file Dockerfile --tag vpeurala/aurinko-pg-9.5.5:latest .;
+     */
+    private static void buildImage() {
         String imageId;
         try {
             imageId = dockerClient.buildImageCmd(new File("docker"))
@@ -60,40 +100,47 @@ public abstract class DockerUsingIntegrationTest {
                 })
                 .awaitImageId();
         } catch (Throwable t) {
-            System.out.printf("Caught throwable: %s\n", t);
+            System.out.printf("Caught throwable while building image: %s\n", t);
             t.printStackTrace();
             throw t;
         }
         System.out.printf("Docker image built with image id %s\n", imageId);
-        // Equivalent shell command:
-        // docker run --detach --hostname jaanmurtaja-db --name jaanmurtaja-db --publish 6543:5432 --user jaanmurtaja vpeurala/aurinko-pg-9.5.5:latest;
-        CreateContainerResponse createContainerResponse = dockerClient
-            .createContainerCmd(IMAGE_NAME)
-            .withExposedPorts(POSTGRES_IMAGE_PORT)
-            .withHostName(CONTAINER_NAME)
-            .withName(CONTAINER_NAME)
-            .withNetworkMode("bridge")
-            .withPortBindings(
-                new PortBinding(
-                    new Binding("localhost", String.valueOf(POSTGRES_CONTAINER_PORT)), POSTGRES_IMAGE_PORT))
-            .exec();
-        containerId = createContainerResponse.getId();
-        dockerClient.startContainerCmd(containerId).exec();
-        System.out.printf("Docker container started with id %s\n", containerId);
     }
 
-    @AfterClass
-    public static void dockerTearDown() throws Exception {
+    /**
+     * Equivalent shell command:
+     * docker run --detach --hostname jaanmurtaja-db --name jaanmurtaja-db --publish 6543:5432 --user jaanmurtaja vpeurala/aurinko-pg-9.5.5:latest;
+     */
+    private static void createContainer() {
+        CreateContainerResponse createContainerResponse;
         try {
-            System.out.printf("Going to stop Docker container with id %s\n", containerId);
-            dockerClient.stopContainerCmd(containerId).exec();
-            dockerClient.removeContainerCmd(containerId).exec();
+            createContainerResponse = dockerClient
+                .createContainerCmd(IMAGE_NAME)
+                .withExposedPorts(POSTGRES_IMAGE_PORT)
+                .withHostName(CONTAINER_NAME)
+                .withName(CONTAINER_NAME)
+                .withNetworkMode("bridge")
+                .withPortBindings(
+                    new PortBinding(
+                        new Binding("localhost", String.valueOf(POSTGRES_CONTAINER_PORT)), POSTGRES_IMAGE_PORT))
+                .exec();
         } catch (Throwable t) {
-            System.out.printf("Caught throwable in dockerTearDown: %s\n", t);
+            System.out.printf("Caught throwable while creating container: %s\n", t);
             t.printStackTrace();
             throw t;
-        } finally {
-            dockerClient.removeContainerCmd(containerId).exec();
         }
+        containerId = createContainerResponse.getId();
+    }
+
+    private static void removeContainer() {
+        List<Container> containers = dockerClient.listContainersCmd().withLabelFilter(CONTAINER_NAME).exec();
+        containers.stream().filter(c -> c.getImageId().equals(IMAGE_NAME)).forEach(c -> {
+            dockerClient.removeContainerCmd(c.getId()).withForce(true).exec();
+        });
+        dockerClient.removeContainerCmd(containerId).withForce(true).exec();
+    }
+
+    private static void stopContainer() {
+        dockerClient.stopContainerCmd(containerId).exec();
     }
 }
