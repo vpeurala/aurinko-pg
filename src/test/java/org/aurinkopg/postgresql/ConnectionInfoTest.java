@@ -3,8 +3,8 @@ package org.aurinkopg.postgresql;
 import org.junit.Test;
 
 import static org.aurinkopg.fixtures.TestFixtures.*;
+import static org.aurinkopg.integrationtests.DockerUsingIntegrationTest.POSTGRES_CONTAINER_PORT;
 import static org.aurinkopg.integrationtests.DockerUsingIntegrationTest.POSTGRES_HOST;
-import static org.aurinkopg.integrationtests.DockerUsingIntegrationTest.POSTGRES_PORT;
 import static org.junit.Assert.assertEquals;
 
 public class ConnectionInfoTest {
@@ -14,7 +14,7 @@ public class ConnectionInfoTest {
     public void canGenerateCorrectJdbcUrl() {
         connectionInfo = new ConnectionInfo.Builder().
             setHost(POSTGRES_HOST).
-            setPort(POSTGRES_PORT.getPort()).
+            setPort(POSTGRES_CONTAINER_PORT).
             setPgUsername(POSTGRES_USERNAME).
             setPgPassword(POSTGRES_PASSWORD).
             setDatabase(POSTGRES_DATABASE).

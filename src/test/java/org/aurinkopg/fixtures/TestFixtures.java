@@ -2,7 +2,7 @@ package org.aurinkopg.fixtures;
 
 import org.aurinkopg.postgresql.ConnectionInfo;
 
-import static org.aurinkopg.integrationtests.DockerUsingIntegrationTest.POSTGRES_PORT;
+import static org.aurinkopg.integrationtests.DockerUsingIntegrationTest.POSTGRES_CONTAINER_PORT;
 
 public class TestFixtures {
     public static final String POSTGRES_USERNAME = "jaanmurtaja";
@@ -29,7 +29,7 @@ public class TestFixtures {
     public static final ConnectionInfo.Builder connectionInfoBuilderWhichCanConnectToTestDockerContainerAsSuperuser() {
         return new ConnectionInfo.Builder()
             .setHost("localhost")
-            .setPort(POSTGRES_PORT.getPort())
+            .setPort(POSTGRES_CONTAINER_PORT)
             .setPgUsername(POSTGRES_USERNAME)
             .setPgPassword(POSTGRES_PASSWORD)
             .setDatabase(POSTGRES_DATABASE);

@@ -6,7 +6,7 @@ import com.github.dockerjava.api.command.DockerCmdExecFactory;
 import com.github.dockerjava.api.model.BuildResponseItem;
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.PortBinding;
-import com.github.dockerjava.api.model.Ports;
+import com.github.dockerjava.api.model.Ports.Binding;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
 import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
@@ -23,7 +23,8 @@ public abstract class DockerUsingIntegrationTest {
     public static final String IMAGE_NAME = "vpeurala/aurinko-pg-9.5.5:latest";
     public static final String CONTAINER_NAME = "jaanmurtaja-db";
     public static final String POSTGRES_HOST = "jaanmurtaja-db";
-    public static final ExposedPort POSTGRES_PORT = ExposedPort.tcp(5432);
+    public static final ExposedPort POSTGRES_IMAGE_PORT = ExposedPort.tcp(5432);
+    public static final int POSTGRES_CONTAINER_PORT = 6543;
     protected static DockerClient dockerClient;
     protected static String containerId;
 
@@ -47,13 +48,20 @@ public abstract class DockerUsingIntegrationTest {
                 .exec(new BuildImageResultCallback() {
                     @Override
                     public void onNext(BuildResponseItem item) {
-                        System.out.println(item.getStream().trim().replaceAll("[ \f\n\r\t]+", " "));
+                        if (item != null && item.getStream() != null) {
+                            System.out.println(
+                                item
+                                    .getStream()
+                                    .trim()
+                                    .replaceAll("[ \f\n\r\t]+", " "));
+                        }
                         super.onNext(item);
                     }
                 })
                 .awaitImageId();
         } catch (Throwable t) {
             System.out.println("Caught throwable: " + t);
+            t.printStackTrace();
             throw t;
         }
         System.out.printf("Docker image built with image id %s\n", imageId);
@@ -61,11 +69,13 @@ public abstract class DockerUsingIntegrationTest {
         // docker run --detach --hostname jaanmurtaja-db --name jaanmurtaja-db --publish 6543:5432 --user jaanmurtaja vpeurala/aurinko-pg-9.5.5:latest;
         CreateContainerResponse createContainerResponse = dockerClient
             .createContainerCmd(IMAGE_NAME)
-            .withAliases(POSTGRES_HOST)
-            .withExposedPorts(POSTGRES_PORT)
+            .withExposedPorts(POSTGRES_IMAGE_PORT)
             .withHostName(CONTAINER_NAME)
             .withName(CONTAINER_NAME)
-            .withPortBindings(new PortBinding(new Ports.Binding("localhost", "6543"), POSTGRES_PORT))
+            .withNetworkMode("bridge")
+            .withPortBindings(
+                new PortBinding(
+                    new Binding("localhost", String.valueOf(POSTGRES_CONTAINER_PORT)), POSTGRES_IMAGE_PORT))
             .exec();
         containerId = createContainerResponse.getId();
         dockerClient.startContainerCmd(containerId).exec();
