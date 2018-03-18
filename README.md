@@ -10,7 +10,14 @@ A snapshot tool for [PostgreSQL](https://www.postgresql.org/) and Java (or other
 
 ## Building
 
+Compile and run tests:
+
 `./gradlew test`
+
+Run tests with code coverage measurement:
+
+`./gradlew clean test jacocoTestReport`
+
 
 ## Influenced by Stellar
 
