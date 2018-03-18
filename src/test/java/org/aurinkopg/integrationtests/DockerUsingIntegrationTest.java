@@ -60,7 +60,7 @@ public abstract class DockerUsingIntegrationTest {
                 })
                 .awaitImageId();
         } catch (Throwable t) {
-            System.out.println("Caught throwable: " + t);
+            System.out.printf("Caught throwable: %s\n", t);
             t.printStackTrace();
             throw t;
         }
@@ -84,8 +84,16 @@ public abstract class DockerUsingIntegrationTest {
 
     @AfterClass
     public static void dockerTearDown() throws Exception {
-        System.out.printf("Going to stop Docker container with id %s\n", containerId);
-        dockerClient.stopContainerCmd(containerId).exec();
-        dockerClient.removeContainerCmd(containerId).exec();
+        try {
+            System.out.printf("Going to stop Docker container with id %s\n", containerId);
+            dockerClient.stopContainerCmd(containerId).exec();
+            dockerClient.removeContainerCmd(containerId).exec();
+        } catch (Throwable t) {
+            System.out.printf("Caught throwable in dockerTearDown: %s\n", t);
+            t.printStackTrace();
+            throw t;
+        } finally {
+            dockerClient.removeContainerCmd(containerId).exec();
+        }
     }
 }
