@@ -28,7 +28,7 @@ import static org.aurinkopg.fixtures.TestFixtures.SELECT_WHOLE_DATASET_SQL;
 import static org.aurinkopg.fixtures.TestFixtures.connectionInfoBuilderWhichCanConnectToTestDockerContainerAsSuperuser;
 import static org.junit.Assert.assertEquals;
 
-public class IntegrationTest implements JsonResourceUser {
+public class IntegrationTest extends DockerUsingIntegrationTest implements JsonResourceUser {
     private ConnectionInfo connectionInfo;
     private DatabaseSnapshotOperator database;
     private DataSource dataSource;
@@ -74,7 +74,7 @@ public class IntegrationTest implements JsonResourceUser {
     }
 
     @Test
-    public void testWithMultipleSnapshots() throws Exception {
+    public void multipleSnapshots() throws Exception {
         assertEquals(initialStateJson(), selectDatabaseState());
         Snapshot initialStateSnapshot = database.takeSnapshot("initial_state_snapshot");
         enlargeUrhoAndSellItToRussia();
