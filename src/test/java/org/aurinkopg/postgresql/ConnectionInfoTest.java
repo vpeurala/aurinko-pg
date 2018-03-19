@@ -19,6 +19,6 @@ public class ConnectionInfoTest {
             setPgPassword(POSTGRES_PASSWORD).
             setDatabase(POSTGRES_DATABASE).
             build();
-        assertEquals("jdbc:postgresql://0.0.0.0:6543/jaanmurtaja", connectionInfo.getJdbcUrl());
+        assertEquals("jdbc:postgresql://jaanmurtaja-db:6543/jaanmurtaja", connectionInfo.getJdbcUrl());
     }
 }
