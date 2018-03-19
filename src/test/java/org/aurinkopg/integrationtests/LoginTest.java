@@ -1,5 +1,6 @@
 package org.aurinkopg.postgresql;
 
+import org.aurinkopg.integrationtests.DockerUsingIntegrationTest;
 import org.junit.Test;
 
 import java.sql.SQLException;
@@ -8,7 +9,7 @@ import static org.aurinkopg.fixtures.TestFixtures.connectionInfoBuilderWhichCanC
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-public class LoginTest {
+public class LoginTest extends DockerUsingIntegrationTest {
     @Test
     public void userWithSuperuserPrivilegesCanUseDatabaseSnapshotOperator() throws Exception {
         ConnectionInfo connectionInfoForJaanmurtaja =

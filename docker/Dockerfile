@@ -62,4 +62,7 @@ RUN echo 'host	all	jaanmurtaja	0.0.0.0/0	md5' >> ${PGDATA}/pg_hba.conf;
 RUN echo 'host	all	tavis	0.0.0.0/0	md5' >> ${PGDATA}/pg_hba.conf;
 
 ENTRYPOINT postgres -D ${PGDATA} -h 0.0.0.0 -i -p 5432;
+
+HEALTHCHECK CMD pg_isready
+
 CMD []
