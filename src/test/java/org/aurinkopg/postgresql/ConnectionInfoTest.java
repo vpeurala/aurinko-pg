@@ -3,8 +3,8 @@ package org.aurinkopg.postgresql;
 import org.junit.Test;
 
 import static org.aurinkopg.fixtures.TestFixtures.*;
-import static org.aurinkopg.integrationtests.DockerUsingIntegrationTest.POSTGRES_CONTAINER_PORT;
-import static org.aurinkopg.integrationtests.DockerUsingIntegrationTest.POSTGRES_HOST;
+import static org.aurinkopg.integrationtests.DockerOperations.POSTGRES_CONTAINER_PORT;
+import static org.aurinkopg.integrationtests.DockerOperations.POSTGRES_HOST;
 import static org.junit.Assert.assertEquals;
 
 public class ConnectionInfoTest {

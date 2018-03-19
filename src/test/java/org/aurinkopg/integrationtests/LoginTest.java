@@ -1,6 +1,8 @@
-package org.aurinkopg.postgresql;
+package org.aurinkopg.integrationtests;
 
 import org.aurinkopg.integrationtests.DockerUsingIntegrationTest;
+import org.aurinkopg.postgresql.ConnectionInfo;
+import org.aurinkopg.postgresql.DatabaseSnapshotOperator;
 import org.junit.Test;
 
 import java.sql.SQLException;

@@ -2,7 +2,7 @@ package org.aurinkopg.fixtures;
 
 import org.aurinkopg.postgresql.ConnectionInfo;
 
-import static org.aurinkopg.integrationtests.DockerUsingIntegrationTest.POSTGRES_CONTAINER_PORT;
+import static org.aurinkopg.integrationtests.DockerOperations.POSTGRES_CONTAINER_PORT;
 
 public class TestFixtures {
     public static final String POSTGRES_USERNAME = "jaanmurtaja";

@@ -40,11 +40,6 @@ public class DockerTest {
     }
 
     @Test
-    public void dockerContainerJaanmurtajaDbIsRunning() throws Exception {
-        assertEquals(true, docker.isDockerContainerRunning());
-    }
-
-    @Test
     public void dockerImageAurinkoPostgreSQLIsFound() throws Exception {
         assertEquals(true, docker.doesDockerImageExist());
     }
