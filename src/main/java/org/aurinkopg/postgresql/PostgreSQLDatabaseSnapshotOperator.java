@@ -199,20 +199,4 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
                         username));
         }
     }
-
-    // TODO Use or delete
-    private boolean doesDatabaseAllowNewConnections(String databaseName, Connection connection) throws SQLException {
-        String sql = String.format(DOES_DATABASE_ALLOW_NEW_CONNECTIONS_SQL, databaseName);
-        List<Map<String, Object>> result = executeSqlQuery(sql, connection);
-        String allow = result.get(0).get("allow").toString();
-        switch (allow) {
-            case "true":
-                return true;
-            case "false":
-                return false;
-            default:
-                throw new IllegalStateException(
-                    "Result from doesDatabaseAllowNewConnections was unknown: " + allow);
-        }
-    }
 }

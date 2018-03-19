@@ -38,6 +38,7 @@ public interface DatabaseSnapshotOperator {
     void restoreSnapshot(Snapshot snapshot) throws Exception;
 
     /**
+     * TODO: Write unit/integration tests
      * TODO: Write javadoc
      *
      * @param snapshot
