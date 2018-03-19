@@ -48,6 +48,9 @@ public abstract class DockerUsingIntegrationTest {
         }
         runWithRetry(DockerOperations::startContainer);
         System.out.printf("Docker container started with id %s\n", containerId);
+        // TODO This Thread.sleep should be replaced with something more elegant
+        // Wait for the database to wake up...
+        Thread.sleep(1000);
     }
 
     public static void runWithRetry(UnaryOperator<DockerClient> dockerClientUnaryOperator) throws Exception {
