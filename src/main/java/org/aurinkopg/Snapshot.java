@@ -42,7 +42,7 @@ public class Snapshot {
         if (!name.matches("[A-Za-z_][A-Za-z0-9_]*")) {
             throw new IllegalArgumentException("Your snapshot name '" +
                 name +
-                "'did not match the pattern of acceptable database names. " +
+                "' did not match the pattern of acceptable database names. " +
                 "See https://www.postgresql.org/docs/current/static/sql-syntax-lexical.html#SQL-SYNTAX-IDENTIFIERS for the rules.");
         }
     }
