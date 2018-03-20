@@ -3,6 +3,7 @@ package org.aurinkopg.coverage;
 import org.aurinkopg.GlobalConstants;
 import org.aurinkopg.locale.FinnishLocaleUtil;
 import org.aurinkopg.locale.MissingFinnishLocaleException;
+import org.aurinkopg.postgresql.SqlExecutor;
 import org.junit.Test;
 
 import java.lang.reflect.Constructor;
@@ -51,6 +52,7 @@ public class InvokeImpossibleThingsForCodeCoverageTest {
     public void invokeDefaultConstructorsOfClassesWhichAreNotMeantToBeInstantiated() throws Exception {
         invokeDefaultConstructor(FinnishLocaleUtil.class);
         invokeDefaultConstructor(GlobalConstants.class);
+        invokeDefaultConstructor(SqlExecutor.class);
     }
 
     private <T> void invokeDefaultConstructor(Class<T> klass) throws Exception {
