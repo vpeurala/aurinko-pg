@@ -65,17 +65,9 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
         Objects.requireNonNull(snapshotName, "Parameter snapshotName in Database.takeSnapshot(connectionInfo) cannot be null!");
         try (Connection connection = ConnectionFactory.openConnection(originalConnectionInfo)) {
             Snapshot snapshot = new Snapshot(snapshotName);
-            // TODO Remove sysout debug
-            System.out.println("Count of other connections to db before block: " + selectCountOfOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection));
             blockNewConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
-            // TODO Remove sysout debug
-            System.out.println("Count of other connections to db after block: " + selectCountOfOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection));
             cancelOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
-            // TODO Remove sysout debug
-            System.out.println("Count of other connections to db after cancel: " + selectCountOfOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection));
             terminateOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
-            // TODO Remove sysout debug
-            System.out.println("Count of other connections to db after terminate: " + selectCountOfOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection));
             copyDatabase(originalConnectionInfo.getDatabase(), snapshot.getName(), connection);
             allowNewConnectionsToAllDatabases(connection);
             return snapshot;
