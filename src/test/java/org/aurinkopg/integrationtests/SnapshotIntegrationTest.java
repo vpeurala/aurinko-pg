@@ -28,7 +28,7 @@ import static org.aurinkopg.fixtures.TestFixtures.SELECT_WHOLE_DATASET_SQL;
 import static org.aurinkopg.fixtures.TestFixtures.connectionInfoBuilderWhichCanConnectToTestDockerContainerAsSuperuser;
 import static org.junit.Assert.assertEquals;
 
-public class IntegrationTest extends DockerUsingIntegrationTest implements JsonResourceUser {
+public class SnapshotIntegrationTest extends DockerUsingIntegrationTest implements JsonResourceUser {
     private ConnectionInfo connectionInfo;
     private DatabaseSnapshotOperator database;
     private DataSource dataSource;
