@@ -157,12 +157,6 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
         executeSqlUpdate(sql, connection);
     }
 
-    private long selectCountOfOtherConnectionsToDatabase(String databaseName, Connection connection) throws SQLException {
-        String sql = String.format(SELECT_COUNT_OF_OTHER_CONNECTIONS_SQL, databaseName);
-        List<Map<String, Object>> result = executeSqlQuery(sql, connection);
-        return (long) result.get(0).get("count");
-    }
-
     private boolean doesDatabaseExist(String databaseName, Connection connection) throws SQLException {
         String sql = String.format(
             DOES_DATABASE_EXIST_SQL,
