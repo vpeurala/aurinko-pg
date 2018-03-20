@@ -11,7 +11,7 @@ import java.util.Map;
 import static java.sql.ResultSet.*;
 import static org.postgresql.core.QueryExecutor.QUERY_NO_RESULTS;
 
-class SqlExecutor {
+public class SqlExecutor {
     static void executeSqlUpdate(String sql, Connection connection) throws SQLException {
         try (PgStatement statement = (PgStatement)
             connection.createStatement(
