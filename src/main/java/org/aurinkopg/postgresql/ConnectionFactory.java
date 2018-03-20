@@ -9,8 +9,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.Properties;
 
-class ConnectionFactory {
-    static Connection openConnection(ConnectionInfo connectionInfo) throws SQLException {
+public class ConnectionFactory {
+    public static Connection openConnection(ConnectionInfo connectionInfo) throws SQLException {
         HostSpec hostSpec = new HostSpec(connectionInfo.getHost(), connectionInfo.getPort());
         HostSpec[] hostSpecs = new HostSpec[]{hostSpec};
         Properties info = new Properties();

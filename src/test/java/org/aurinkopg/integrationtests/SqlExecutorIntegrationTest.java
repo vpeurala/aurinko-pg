@@ -1,7 +1,8 @@
-package org.aurinkopg.postgresql;
+package org.aurinkopg.integrationtests;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.aurinkopg.integrationtests.DockerUsingIntegrationTest;
+import org.aurinkopg.postgresql.ConnectionFactory;
+import org.aurinkopg.postgresql.ConnectionInfo;
 import org.aurinkopg.testingtools.JsonResourceUser;
 import org.junit.After;
 import org.junit.Before;
@@ -19,7 +20,7 @@ import static org.junit.Assert.assertEquals;
 
 // TODO: These tests depend on the database being in the default initial state (like it is after running ./docker/init_db.sh).
 // These tests should put the database in the required state themselves.
-public class SqlExecutorTest extends DockerUsingIntegrationTest implements JsonResourceUser {
+public class SqlExecutorIntegrationTest extends DockerUsingIntegrationTest implements JsonResourceUser {
     private ConnectionInfo connectionInfo;
     private ConnectionFactory connectionFactory;
     private Connection connection;

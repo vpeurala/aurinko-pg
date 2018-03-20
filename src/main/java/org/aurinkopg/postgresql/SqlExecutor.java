@@ -22,7 +22,7 @@ public class SqlExecutor {
         }
     }
 
-    static List<Map<String, Object>> executeSqlQuery(String sql, Connection connection) throws SQLException {
+    public static List<Map<String, Object>> executeSqlQuery(String sql, Connection connection) throws SQLException {
         try (Statement statement =
                  connection.createStatement(
                      TYPE_FORWARD_ONLY,

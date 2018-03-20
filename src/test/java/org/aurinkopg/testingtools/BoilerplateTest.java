@@ -14,6 +14,7 @@ public class BoilerplateTest {
 
     @Test
     public void invokeToString() throws Exception {
-        new ConnectionInfo("", 0, "", "", "", new HashMap<>());
+        new ConnectionInfo("", 0, "", "", "", new HashMap<>())
+            .toString();
     }
 }
