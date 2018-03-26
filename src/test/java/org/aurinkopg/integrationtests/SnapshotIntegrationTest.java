@@ -9,6 +9,7 @@ import org.aurinkopg.postgresql.DatabaseSnapshotOperator;
 import org.aurinkopg.testingtools.JsonResourceUser;
 import org.junit.Before;
 import org.junit.Test;
+import org.postgresql.util.PSQLException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DataSourceTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
@@ -27,6 +28,7 @@ import java.util.Map;
 import static org.aurinkopg.fixtures.TestFixtures.SELECT_WHOLE_DATASET_SQL;
 import static org.aurinkopg.fixtures.TestFixtures.connectionInfoBuilderWhichCanConnectToTestDockerContainerAsSuperuser;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 
 public class SnapshotIntegrationTest extends DockerUsingIntegrationTest implements JsonResourceUser {
     private ConnectionInfo connectionInfo;
@@ -85,6 +87,19 @@ public class SnapshotIntegrationTest extends DockerUsingIntegrationTest implemen
         assertEquals(stateAfterEnlargingUrhoAndSellingItToRussia(), selectDatabaseState());
         database.restoreSnapshot(initialStateSnapshot);
         assertEquals(initialStateJson(), selectDatabaseState());
+    }
+
+    @Test
+    public void snapshotCanBeDeleted() throws Exception {
+        Snapshot snapshot = database.takeSnapshot("snapshot_which_will_be_deleted");
+        database.deleteSnapshot(snapshot);
+        // Restoring the snapshot does not work anymore, since it has been deleted.
+        try {
+            database.restoreSnapshot(snapshot);
+            fail("An exception should have been thrown.");
+        } catch (PSQLException e) {
+            assertEquals("FATAL: database \"snapshot_which_will_be_deleted\" does not exist", e.getMessage());
+        }
     }
 
     private String initialStateJson() throws IOException {
