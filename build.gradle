@@ -1,6 +1,7 @@
 apply plugin: 'java'
 apply plugin: 'jacoco'
 apply plugin: 'maven'
+apply plugin: 'signing'
 
 project.group = 'org.aurinko-pg'
 // archiveTask.baseName = 'aurinko'
@@ -33,3 +34,66 @@ jacocoTestReport {
   }
 }
 test.finalizedBy(project.tasks.jacocoTestReport)
+
+task javadocJar(type: Jar) {
+  classifier = 'javadoc'
+  from javadoc
+}
+
+task sourcesJar(type: Jar) {
+  classifier = 'sources'
+  from sourceSets.main.allSource
+}
+
+artifacts {
+  archives javadocJar, sourcesJar
+}
+
+signing {
+  sign configurations.archives
+}
+
+uploadArchives {
+  repositories {
+    mavenDeployer {
+      beforeDeployment { MavenDeployment deployment -> signing.signPom(deployment) }
+
+      repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+        authentication(userName: ossrhUsername, password: ossrhPassword)
+      }
+
+      pom.project {
+        name 'Aurinko-pg'
+        packaging 'jar'
+        artifactId 'org.aurinko-pg:aurinko-pg:0.4'
+        description 'A database snapshot tool in Java, influenced by Stellar (in Python).'
+        url 'https://github.com/vpeurala/aurinko-pg'
+
+        scm {
+          connection 'git@github.com:vpeurala/aurinko-pg.git'
+          developerConnection 'git@github.com:vpeurala/aurinko-pg.git'
+          url 'https://github.com/vpeurala/aurinko-pg'
+        }
+
+        licenses {
+          license {
+            name 'MIT License'
+            url 'https://opensource.org/licenses/MIT'
+          }
+        }
+
+        developers {
+          developer {
+            id 'vpeurala'
+            name 'Ville Peurala'
+            email 'ville.peurala@gmail.com'
+          }
+        }
+      }
+    }
+  }
+}
