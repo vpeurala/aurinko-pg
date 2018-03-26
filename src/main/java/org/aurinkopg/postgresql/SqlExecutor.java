@@ -13,23 +13,23 @@ import static org.postgresql.core.QueryExecutor.QUERY_NO_RESULTS;
 
 public class SqlExecutor {
     static void executeSqlUpdate(String sql, Connection connection) throws SQLException {
-        try (PgStatement statement = (PgStatement)
+        PgStatement statement = (PgStatement)
             connection.createStatement(
                 TYPE_FORWARD_ONLY,
                 CONCUR_READ_ONLY,
-                CLOSE_CURSORS_AT_COMMIT)) {
-            statement.executeWithFlags(sql, QUERY_NO_RESULTS);
-        }
+                CLOSE_CURSORS_AT_COMMIT);
+        statement.closeOnCompletion();
+        statement.executeWithFlags(sql, QUERY_NO_RESULTS);
     }
 
     public static List<Map<String, Object>> executeSqlQuery(String sql, Connection connection) throws SQLException {
-        try (Statement statement =
-                 connection.createStatement(
-                     TYPE_FORWARD_ONLY,
-                     CONCUR_READ_ONLY,
-                     CLOSE_CURSORS_AT_COMMIT)) {
-            return resultSetToListOfMaps(statement.executeQuery(sql));
-        }
+        Statement statement =
+            connection.createStatement(
+                TYPE_FORWARD_ONLY,
+                CONCUR_READ_ONLY,
+                CLOSE_CURSORS_AT_COMMIT);
+        statement.closeOnCompletion();
+        return resultSetToListOfMaps(statement.executeQuery(sql));
     }
 
     private static List<Map<String, Object>> resultSetToListOfMaps(ResultSet resultSet) throws SQLException {

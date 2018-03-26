@@ -63,15 +63,15 @@ class PostgreSQLDatabaseSnapshotOperator implements DatabaseSnapshotOperator {
     @Override
     public Snapshot takeSnapshot(String snapshotName) throws SQLException {
         Objects.requireNonNull(snapshotName, "Parameter snapshotName in Database.takeSnapshot(connectionInfo) cannot be null!");
-        try (Connection connection = ConnectionFactory.openConnection(originalConnectionInfo)) {
-            Snapshot snapshot = new Snapshot(snapshotName);
-            blockNewConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
-            cancelOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
-            terminateOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
-            copyDatabase(originalConnectionInfo.getDatabase(), snapshot.getName(), connection);
-            allowNewConnectionsToAllDatabases(connection);
-            return snapshot;
-        }
+        Connection connection = ConnectionFactory.openConnection(originalConnectionInfo);
+        Snapshot snapshot = new Snapshot(snapshotName);
+        blockNewConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
+        cancelOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
+        terminateOtherConnectionsToDatabase(originalConnectionInfo.getDatabase(), connection);
+        copyDatabase(originalConnectionInfo.getDatabase(), snapshot.getName(), connection);
+        allowNewConnectionsToAllDatabases(connection);
+        connection.close();
+        return snapshot;
     }
 
     // TODO This method is too complex and difficult to understand.
