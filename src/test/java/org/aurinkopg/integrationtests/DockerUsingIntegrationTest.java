@@ -12,13 +12,13 @@ import org.junit.BeforeClass;
 
 import java.util.function.UnaryOperator;
 
-import static org.aurinkopg.integrationtests.DockerOperations.containerId;
-
 public abstract class DockerUsingIntegrationTest {
     private static DockerClient dockerClient;
+    private static DockerOperations dockerOperations;
 
     @BeforeClass
     public static void dockerSetUp() throws Exception {
+        dockerOperations = new DockerOperations();
         DockerClientConfig dockerConfig = DefaultDockerClientConfig
             .createDefaultConfigBuilder()
             .build();
@@ -30,29 +30,45 @@ public abstract class DockerUsingIntegrationTest {
         dockerClient = DockerClientBuilder.getInstance(dockerConfig)
             .withDockerCmdExecFactory(dockerCmdExecFactory)
             .build();
-        runWithRetry(DockerOperations::buildImage);
+        runWithRetry(dockerOperations::buildImage);
         try {
-            runWithRetry(DockerOperations::createContainer);
+            runWithRetry(dockerOperations::createContainer);
         } catch (Throwable t) {
             System.out.printf("Caught throwable in createContainer: %s\n", t);
             t.printStackTrace();
             try {
-                runWithRetry(DockerOperations::stopContainer);
-                runWithRetry(DockerOperations::removeContainer);
-                runWithRetry(DockerOperations::createContainer);
+                runWithRetry(dockerOperations::stopContainer);
+                runWithRetry(dockerOperations::removeContainer);
+                runWithRetry(dockerOperations::createContainer);
             } catch (Throwable t2) {
                 System.out.printf("Caught throwable in createContainer retry: %s\n", t2);
                 t2.printStackTrace();
                 throw t2;
             }
         }
-        runWithRetry(DockerOperations::startContainer);
-        System.out.printf("Docker container started with id %s\n", containerId);
+        runWithRetry(dockerOperations::startContainer);
+        System.out.printf("Docker container started with id %s\n", dockerOperations.getContainerId());
         // Wait for the database to wake up...
         Thread.sleep(1000);
     }
 
-    public static void runWithRetry(UnaryOperator<DockerClient> dockerClientUnaryOperator) throws Exception {
+    @AfterClass
+    public static void dockerTearDown() throws Exception {
+        try {
+            System.out.printf("Going to stop Docker container with id %s\n", dockerOperations.getContainerId());
+            runWithRetry(dockerOperations::stopContainer);
+            runWithRetry(dockerOperations::removeContainer);
+        } catch (Throwable t) {
+            System.out.printf("Caught throwable in dockerTearDown: %s, message: %s\n", t.getClass(), t.getMessage());
+            t.printStackTrace();
+            throw t;
+        } finally {
+            runWithRetry(dockerOperations::removeContainer);
+        }
+    }
+
+
+    private static void runWithRetry(UnaryOperator<DockerClient> dockerClientUnaryOperator) {
         int retries = 0;
         while (retries < 100) {
             try {
@@ -71,21 +87,6 @@ public abstract class DockerUsingIntegrationTest {
                     break;
                 }
             }
-        }
-    }
-
-    @AfterClass
-    public static void dockerTearDown() throws Exception {
-        try {
-            System.out.printf("Going to stop Docker container with id %s\n", containerId);
-            runWithRetry(DockerOperations::stopContainer);
-            runWithRetry(DockerOperations::removeContainer);
-        } catch (Throwable t) {
-            System.out.printf("Caught throwable in dockerTearDown: %s, message: %s\n", t.getClass(), t.getMessage());
-            t.printStackTrace();
-            throw t;
-        } finally {
-            runWithRetry(DockerOperations::removeContainer);
         }
     }
 }

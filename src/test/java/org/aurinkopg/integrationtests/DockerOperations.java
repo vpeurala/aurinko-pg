@@ -10,22 +10,19 @@ import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 
-/**
- * TODO WARNING: Not thread safe!
- */
-public abstract class DockerOperations {
+public class DockerOperations {
     public static final String IMAGE_NAME = "vpeurala/aurinko-pg-9.5.5:latest";
     public static final String CONTAINER_NAME = "jaanmurtaja-db";
     public static final String POSTGRES_HOST = "jaanmurtaja-db";
     public static final ExposedPort POSTGRES_IMAGE_PORT = ExposedPort.tcp(5432);
     public static final int POSTGRES_CONTAINER_PORT = 6543;
-    protected static String containerId;
+    private String containerId;
 
     /**
      * Equivalent shell command:
      * docker build --file Dockerfile --tag vpeurala/aurinko-pg-9.5.5:latest .;
      */
-    public static DockerClient buildImage(DockerClient dockerClient) {
+    public DockerClient buildImage(DockerClient dockerClient) {
         String imageId;
         try {
             imageId = dockerClient.buildImageCmd(new File("docker"))
@@ -57,7 +54,7 @@ public abstract class DockerOperations {
      * Equivalent shell command:
      * docker run --detach --hostname jaanmurtaja-db --name jaanmurtaja-db --publish 6543:5432 --user jaanmurtaja vpeurala/aurinko-pg-9.5.5:latest;
      */
-    public static DockerClient createContainer(DockerClient dockerClient) {
+    public DockerClient createContainer(DockerClient dockerClient) {
         CreateContainerResponse createContainerResponse;
         try {
             createContainerResponse = dockerClient
@@ -75,26 +72,34 @@ public abstract class DockerOperations {
             t.printStackTrace();
             throw t;
         }
-        containerId = createContainerResponse.getId();
+        setContainerId(createContainerResponse.getId());
         return dockerClient;
     }
 
-    public static DockerClient removeContainer(DockerClient dockerClient) {
+    public DockerClient removeContainer(DockerClient dockerClient) {
         List<Container> containers = dockerClient.listContainersCmd().withLabelFilter(CONTAINER_NAME).exec();
         containers.stream().filter(c -> c.getImageId().equals(IMAGE_NAME)).forEach(c -> {
             dockerClient.removeContainerCmd(c.getId()).withForce(true).exec();
         });
-        dockerClient.removeContainerCmd(containerId).withForce(true).exec();
+        dockerClient.removeContainerCmd(getContainerId()).withForce(true).exec();
         return dockerClient;
     }
 
-    public static DockerClient stopContainer(DockerClient dockerClient) {
-        dockerClient.stopContainerCmd(containerId).exec();
+    public DockerClient stopContainer(DockerClient dockerClient) {
+        dockerClient.stopContainerCmd(getContainerId()).exec();
         return dockerClient;
     }
 
-    public static DockerClient startContainer(DockerClient dockerClient) {
-        dockerClient.startContainerCmd(containerId).exec();
+    public DockerClient startContainer(DockerClient dockerClient) {
+        dockerClient.startContainerCmd(getContainerId()).exec();
         return dockerClient;
+    }
+
+    public String getContainerId() {
+        return containerId;
+    }
+
+    public void setContainerId(String containerId) {
+        this.containerId = containerId;
     }
 }
