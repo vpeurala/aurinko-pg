@@ -4,9 +4,7 @@ apply plugin: 'maven'
 apply plugin: 'signing'
 
 project.group = 'org.aurinko-pg'
-// archiveTask.baseName = 'aurinko'
 project.version = '0.4'
-// archiveTask.extension = 'jar'
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -69,7 +67,9 @@ uploadArchives {
       pom.project {
         name 'Aurinko-pg'
         packaging 'jar'
-        artifactId 'org.aurinko-pg:aurinko-pg:0.4'
+        groupId 'org.aurinko-pg'
+        artifactId 'aurinko-pg'
+
         description 'A database snapshot tool in Java, influenced by Stellar (in Python).'
         url 'https://github.com/vpeurala/aurinko-pg'
 
