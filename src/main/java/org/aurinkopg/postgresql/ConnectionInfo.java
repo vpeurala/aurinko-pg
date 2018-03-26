@@ -26,7 +26,7 @@ public class ConnectionInfo {
      * @param pgUsername           database username (NOT the operating system username!) of the user as which you want to connect. Cannot be null.
      * @param pgPassword           database password (NOT the operating system password!) of the user as which you want to connect. Can be null, since not all PostgreSQL users authenticate via a password.
      * @param database             one PostgreSQL database server can contain multiple databases; this is the name of the database to which you want to connect. Cannot be null.
-     * @param connectionProperties a {@link Map<PGProperty, String>} of extra connection properties. Cannot be null, but can be empty.
+     * @param connectionProperties a {@link Map} of extra connection properties. Cannot be null, but can be empty.
      */
     public ConnectionInfo(
         String host,

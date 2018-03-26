@@ -21,28 +21,27 @@ public interface DatabaseSnapshotOperator {
     }
 
     /**
-     * TODO: Write javadoc
+     * Take a snapshot of the current database.
      *
-     * @param snapshotName
-     * @return
-     * @throws SQLException
+     * @param snapshotName the name for the snapshot.
+     * @return the snapshot taken.
+     * @throws SQLException if something goes wrong.
      */
     Snapshot takeSnapshot(String snapshotName) throws SQLException;
 
     /**
-     * TODO: Write javadoc
+     * Restore the database state from a snapshot.
      *
-     * @param snapshot
-     * @throws Exception
+     * @param snapshot the snapshot to restore.
+     * @throws Exception if something goes wrong.
      */
     void restoreSnapshot(Snapshot snapshot) throws Exception;
 
     /**
-     * TODO: Write unit/integration tests
-     * TODO: Write javadoc
+     * Delete a snapshot.
      *
-     * @param snapshot
-     * @throws SQLException
+     * @param snapshot the snapshot to delete.
+     * @throws SQLException if something goes wrong.
      */
     void deleteSnapshot(Snapshot snapshot) throws SQLException;
 
