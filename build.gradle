@@ -48,6 +48,14 @@ artifacts {
   archives javadocJar, sourcesJar
 }
 
+publishing {
+  publications {
+    mavenJava(MavenPublication) {
+      from components.java
+    }
+  }
+}
+
 signing {
   sign configurations.archives
 }
