@@ -12,7 +12,7 @@ nexusStaging {
 project.group = 'org'
 project.version = '0.4.1'
 
-group='org.aurinko-pg'
+group='org'
 archivesBaseName='aurinko-pg'
 version='0.4.1'
 
