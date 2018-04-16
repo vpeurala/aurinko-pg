@@ -6,10 +6,10 @@ apply plugin: 'signing'
 apply plugin: 'io.codearte.nexus-staging'
 
 nexusStaging {
-  packageGroup = "org.aurinko-pg.aurinko-pg"
+  packageGroup = "org.aurinko-pg"
 }
 
-project.group = 'org.aurinko-pg'
+project.group = 'org'
 project.version = '0.4.1'
 
 group='org.aurinko-pg'
@@ -69,6 +69,9 @@ artifacts {
 publishing {
   publications {
     mavenJava(MavenPublication) {
+      groupId 'org'
+      artifactId 'aurinko-pg'
+      version '0.4.1'
       from components.java
     }
   }
@@ -94,7 +97,7 @@ uploadArchives {
       pom.project {
         name 'Aurinko-pg'
         packaging 'jar'
-        groupId 'org.aurinko-pg'
+        groupId 'org'
         artifactId 'aurinko-pg'
 
         description 'A database snapshot tool in Java, influenced by Stellar (in Python).'
